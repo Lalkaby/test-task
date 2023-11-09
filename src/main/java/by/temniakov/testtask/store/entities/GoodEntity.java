@@ -3,16 +3,16 @@ package by.temniakov.testtask.store.entities;
 import by.temniakov.testtask.store.enums.Currency;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "tsk_good")
 public class GoodEntity {
     @Id
@@ -22,14 +22,12 @@ public class GoodEntity {
     private String title;
 
     @Column
-    @Min(value = 0)
     private Integer amount;
 
     @Column
     private String producer;
 
     @Column
-    @Min(value = 0)
     private Double price;
 
     @Column

@@ -21,7 +21,6 @@ public class AddressEntity {
 
     @Column
     @Enumerated(EnumType.STRING)
-    @NotNull
     private City city;
 
     @Column
