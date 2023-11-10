@@ -38,7 +38,7 @@ public class GoodEntity {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToMany(mappedBy = "good",
-            targetEntity = GoodOrderEntity.class)
+            targetEntity = GoodOrderEntity.class,fetch = FetchType.LAZY)
     private List<GoodOrderEntity> orderAssoc = new ArrayList<>();
 }
 

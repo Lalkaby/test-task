@@ -1,7 +1,8 @@
 package by.temniakov.testtask.api.dto;
 
+import by.temniakov.testtask.store.enums.RegexpConstants;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.annotation.Nonnull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,25 +16,31 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDTO {
-    @Nonnull
+    public static final OrderDTO EMPTY = new OrderDTO();
+
+    @NotNull
+    private Integer id;
+
+    @NotBlank
     private String username;
 
-    @Nonnull
     @JsonProperty(value = "phone_number")
     private String phoneNumber;
 
-    @Nonnull
     @JsonProperty(value = "order_time")
     private Instant orderTime;
 
+    @NotBlank
+    @Email(regexp = RegexpConstants.EMAIL)
     private String email;
-
-    @Nonnull
+    
+    @NotNull
     private AddressDTO address;
 
-    @Nonnull
+    // TODO: 10.11.2023 Think about it
+    @NotNull
     private List<GoodDTO> goods;
 
-    @Nonnull
+    @Null
     private Integer amount;
 }

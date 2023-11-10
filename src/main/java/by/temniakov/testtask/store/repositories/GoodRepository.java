@@ -12,4 +12,6 @@ public interface GoodRepository
     Stream<GoodEntity> findAllByPriceLessThan(Double price, Pageable pageable);
     Stream<GoodEntity> findAllByPriceGreaterThan(Double price, Pageable pageable);
 
+    
+
 }
