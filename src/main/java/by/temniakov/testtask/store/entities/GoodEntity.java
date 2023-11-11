@@ -1,10 +1,10 @@
 package by.temniakov.testtask.store.entities;
 
-import by.temniakov.testtask.store.enums.Currency;
+import by.temniakov.testtask.enums.Currency;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class GoodEntity {
     private String producer;
 
     @Column
-    private Double price;
+    private BigDecimal price;
 
     @Column
     @Enumerated(EnumType.STRING)

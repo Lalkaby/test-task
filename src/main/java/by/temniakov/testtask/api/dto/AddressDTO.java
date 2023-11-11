@@ -1,11 +1,15 @@
 package by.temniakov.testtask.api.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import by.temniakov.testtask.enums.City;
+import by.temniakov.testtask.validation.annotation.CityEnum;
+import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import static by.temniakov.testtask.enums.City.MINSK;
+import static by.temniakov.testtask.enums.City.VITEBSK;
 
 @Data
 @Builder
@@ -14,15 +18,14 @@ import lombok.NoArgsConstructor;
 public class AddressDTO {
     public static final AddressDTO EMPTY = new AddressDTO();
 
-    @NotNull
     private Integer id;
 
-    @NotBlank
-    private String city;
+    @CityEnum(anyOf = {VITEBSK,MINSK})
+    private City city;
 
-    @NotBlank
+    @NullOrNotBlank
     private String street;
 
-    @NotBlank
+    @NullOrNotBlank
     private String house;
 }

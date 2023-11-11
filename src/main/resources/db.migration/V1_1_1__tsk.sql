@@ -25,4 +25,3 @@ UPDATE tsk_address SET city = upper(city);
 
 
 
-

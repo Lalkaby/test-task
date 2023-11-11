@@ -1,6 +1,9 @@
 package by.temniakov.testtask.api.mappers;
 
-import by.temniakov.testtask.store.enums.Currency;
+import by.temniakov.testtask.enums.City;
+import by.temniakov.testtask.enums.Currency;
+import by.temniakov.testtask.enums.Status;
+
 
 public interface BaseMapper {
     default Integer mapToInt(Object value) {
@@ -31,6 +34,20 @@ public interface BaseMapper {
     default Currency mapToCurrency(Object value) {
         if (value instanceof Currency) {
             return (Currency) value;
+        }
+        return null;
+    }
+
+    default Status mapToStatus(Object value){
+        if (value instanceof Status) {
+            return (Status) value;
+        }
+        return null;
+    }
+
+    default City mapToCity(Object value){
+        if (value instanceof City) {
+            return (City) value;
         }
         return null;
     }

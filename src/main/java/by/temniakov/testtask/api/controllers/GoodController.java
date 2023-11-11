@@ -1,6 +1,7 @@
 package by.temniakov.testtask.api.controllers;
 
 import by.temniakov.testtask.api.dto.GoodDTO;
+import by.temniakov.testtask.api.exceptions.NotFoundException;
 import by.temniakov.testtask.api.mappers.GoodMapper;
 import by.temniakov.testtask.store.entities.GoodEntity;
 import by.temniakov.testtask.store.repositories.GoodRepository;
@@ -53,15 +54,20 @@ public class GoodController {
     @PatchMapping(value = UPDATE_GOOD)
     public ResponseEntity<GoodDTO> updateGood(
             @PathVariable(name = "id_good") Integer goodId, @Valid @RequestBody GoodDTO goodDTO){
-        Optional<GoodEntity> optionalGood = goodRepository.findById(goodId);
-        if (!goodDTO.equals(GoodDTO.EMPTY)){
-            optionalGood.ifPresent(entity -> {
-                goodMapper.updateEntityFromDTO(goodDTO, entity);
-                goodRepository.saveAndFlush(entity);
-            });
+        GoodEntity good = goodRepository
+                .findById(goodId)
+                .orElseThrow(()->
+                        new NotFoundException("Good doesn't exists.",goodId)
+                );
+
+
+        GoodEntity cloneGood = goodMapper.cloneEntity(good);
+        goodMapper.updateEntityFromDTO(goodDTO,good);
+        if (!cloneGood.equals(good)){
+            goodRepository.saveAndFlush(good);
         }
 
-        return ResponseEntity.of(optionalGood.map(goodMapper::toDTO));
+        return ResponseEntity.of(Optional.of(good).map(goodMapper::toDTO));
 
     }
 }

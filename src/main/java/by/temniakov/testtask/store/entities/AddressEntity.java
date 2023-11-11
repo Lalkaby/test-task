@@ -1,8 +1,7 @@
 package by.temniakov.testtask.store.entities;
 
-import by.temniakov.testtask.store.enums.City;
+import by.temniakov.testtask.enums.City;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.ArrayList;

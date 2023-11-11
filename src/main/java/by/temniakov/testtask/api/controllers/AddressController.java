@@ -19,13 +19,7 @@ public class AddressController {
     @GetMapping(GET_ADDRESS)
     public ResponseEntity<AddressDTO> getAddress(
             @PathVariable(name = "id_address") String addressId){
-        AddressDTO response = AddressDTO.builder()
-                .street("some")
-                .house("some")
-                .city("some")
-                .id(1).build()
-                ;
-        return ResponseEntity.of(Optional.empty());
+        throw  new UnsupportedOperationException("Not implemented");
     }
 
     @GetMapping(GET_ADDRESSES)

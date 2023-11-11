@@ -1,8 +1,13 @@
 package by.temniakov.testtask.api.dto;
 
-import by.temniakov.testtask.store.enums.RegexpConstants;
+import by.temniakov.testtask.enums.RegexpConstants;
+import by.temniakov.testtask.enums.Status;
+import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
+import by.temniakov.testtask.validation.annotation.StatusEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +16,8 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.List;
 
+import static by.temniakov.testtask.enums.Status.*;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,10 +25,9 @@ import java.util.List;
 public class OrderDTO {
     public static final OrderDTO EMPTY = new OrderDTO();
 
-    @NotNull
     private Integer id;
 
-    @NotBlank
+    @NullOrNotBlank
     private String username;
 
     @JsonProperty(value = "phone_number")
@@ -30,12 +36,16 @@ public class OrderDTO {
     @JsonProperty(value = "order_time")
     private Instant orderTime;
 
-    @NotBlank
+    @NullOrNotBlank
     @Email(regexp = RegexpConstants.EMAIL)
-    private String email;
+    @JsonProperty(value = "user_email")
+    private String userEmail;
     
     @NotNull
     private AddressDTO address;
+
+    @StatusEnum(anyOf = {ACTIVE,COMPLETED,CANCELLED})
+    private Status status;
 
     // TODO: 10.11.2023 Think about it
     @NotNull
