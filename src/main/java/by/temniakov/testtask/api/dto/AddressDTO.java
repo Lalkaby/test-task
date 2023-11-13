@@ -3,6 +3,7 @@ package by.temniakov.testtask.api.dto;
 import by.temniakov.testtask.enums.City;
 import by.temniakov.testtask.validation.annotation.CityEnum;
 import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +21,7 @@ public class AddressDTO {
 
     private Integer id;
 
-    @CityEnum(anyOf = {VITEBSK,MINSK})
+    @CityEnum(anyOf = {VITEBSK,MINSK},nullable = true)
     private City city;
 
     @NullOrNotBlank

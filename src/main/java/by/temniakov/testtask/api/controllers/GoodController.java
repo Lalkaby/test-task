@@ -1,5 +1,6 @@
 package by.temniakov.testtask.api.controllers;
 
+import by.temniakov.testtask.api.controllers.helpers.ControllerHelper;
 import by.temniakov.testtask.api.dto.GoodDTO;
 import by.temniakov.testtask.api.exceptions.NotFoundException;
 import by.temniakov.testtask.api.mappers.GoodMapper;
@@ -20,8 +21,9 @@ import java.util.Optional;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class GoodController {
-    private final GoodRepository goodRepository;
     private final GoodMapper goodMapper;
+    private final GoodRepository goodRepository;
+    private final ControllerHelper controllerHelper;
 
     public static final String GET_GOOD = "/good/{id_good}";
     public static final String GET_GOODS  = "/goods";
@@ -54,12 +56,7 @@ public class GoodController {
     @PatchMapping(value = UPDATE_GOOD)
     public ResponseEntity<GoodDTO> updateGood(
             @PathVariable(name = "id_good") Integer goodId, @Valid @RequestBody GoodDTO goodDTO){
-        GoodEntity good = goodRepository
-                .findById(goodId)
-                .orElseThrow(()->
-                        new NotFoundException("Good doesn't exists.",goodId)
-                );
-
+        GoodEntity good = controllerHelper.getGoodOrThrowException(goodId);
 
         GoodEntity cloneGood = goodMapper.cloneEntity(good);
         goodMapper.updateEntityFromDTO(goodDTO,good);

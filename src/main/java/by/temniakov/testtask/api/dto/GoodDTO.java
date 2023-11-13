@@ -33,7 +33,8 @@ public class GoodDTO {
     @NullOrNotBlank
     private String producer;
 
-    @CurrencyEnum(anyOf = {BYN,USD,RUB})
+    @Null
+    @CurrencyEnum(anyOf = {BYN,USD,RUB},nullable = true)
     private Currency currency;
 
     @DecimalMin(value = "0", message = "Price must be more than 0", inclusive = false)

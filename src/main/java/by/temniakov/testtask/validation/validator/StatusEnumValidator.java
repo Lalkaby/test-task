@@ -9,14 +9,19 @@ import java.util.Arrays;
 
 public class StatusEnumValidator implements ConstraintValidator<StatusEnum, Status> {
     private Status[] subset;
+    private boolean nullable;
 
     @Override
     public void initialize(StatusEnum constraint) {
         this.subset = constraint.anyOf();
+        this.nullable = constraint.nullable();
     }
 
     @Override
     public boolean isValid(Status value, ConstraintValidatorContext context) {
-        return value == null || Arrays.asList(subset).contains(value);
+        if (nullable && value == null){
+            return true;
+        }
+        return value != null && Arrays.asList(subset).contains(value);
     }
 }

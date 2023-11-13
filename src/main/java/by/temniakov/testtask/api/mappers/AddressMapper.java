@@ -1,6 +1,7 @@
 package by.temniakov.testtask.api.mappers;
 
 import by.temniakov.testtask.api.dto.AddressDTO;
+import by.temniakov.testtask.api.dto.CreateAddressDTO;
 import by.temniakov.testtask.api.dto.GoodDTO;
 import by.temniakov.testtask.store.entities.AddressEntity;
 import by.temniakov.testtask.store.entities.GoodEntity;
@@ -16,6 +17,11 @@ public interface AddressMapper extends BaseMapper{
     @Mapping(source = "street",target = "street")
     @Mapping(source = "house",target = "house")
     AddressDTO toDTO(AddressEntity entity);
+
+    @Mapping(source = "city",target = "city")
+    @Mapping(source = "street",target = "street")
+    @Mapping(source = "house",target = "house")
+    AddressEntity fromDTO(CreateAddressDTO addressDTO);
 
     @Mapping(source = "id", target = "id", ignore = true)
     @Mapping(source = "city",target = "city")

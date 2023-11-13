@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.control.DeepClone;
 
+// TODO: 11.11.2023 Finish mapping  
 @Mapper(componentModel = "spring")
 public interface OrderMapper extends BaseMapper{
     @Mapping(source = "id", target = "id")

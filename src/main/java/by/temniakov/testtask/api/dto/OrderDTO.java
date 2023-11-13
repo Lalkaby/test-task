@@ -44,7 +44,7 @@ public class OrderDTO {
     @NotNull
     private AddressDTO address;
 
-    @StatusEnum(anyOf = {ACTIVE,COMPLETED,CANCELLED})
+    @StatusEnum(anyOf = {ACTIVE,COMPLETED,CANCELLED},nullable = true)
     private Status status;
 
     // TODO: 10.11.2023 Think about it

@@ -18,7 +18,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = CurrencyEnumValidator.class)
 public @interface CurrencyEnum {
     Currency[] anyOf();
+    boolean nullable() default false;
     String message() default "must be any of {anyOf}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
+
 }
