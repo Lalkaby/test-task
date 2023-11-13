@@ -1,16 +1,16 @@
 package by.temniakov.testtask.store.repositories.specifications;
 
-import by.temniakov.testtask.store.entities.OrderEntity;
+import by.temniakov.testtask.store.entities.Order;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
-public class OrderSpecification implements Specification<OrderEntity> {
+public class OrderSpecification implements Specification<Order> {
     private SearchCriteria criteria;
     @Override
-    public Predicate toPredicate(Root<OrderEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
 
         if (criteria.getOperation().equalsIgnoreCase(">")) {
             return builder.greaterThanOrEqualTo(

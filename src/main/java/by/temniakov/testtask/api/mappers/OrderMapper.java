@@ -1,7 +1,7 @@
 package by.temniakov.testtask.api.mappers;
 
-import by.temniakov.testtask.api.dto.OrderDTO;
-import by.temniakov.testtask.store.entities.OrderEntity;
+import by.temniakov.testtask.api.dto.OrderDto;
+import by.temniakov.testtask.store.entities.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -12,13 +12,13 @@ import org.mapstruct.control.DeepClone;
 public interface OrderMapper extends BaseMapper{
     @Mapping(source = "id", target = "id")
     @Mapping(expression =
-            "java(entity.getGoodAssoc().stream().mapToInt(GoodOrderEntity::getAmount).sum())",
+            "java(entity.getGoodAssoc().stream().mapToInt(GoodOrder::getAmount).sum())",
             target = "amount")
-    OrderDTO toDTO(OrderEntity entity);
+    OrderDto toDto(Order entity);
 
     @Mapping(source = "id", target = "id", ignore = true)
-    void updateEntityFromDTO(OrderDTO addressDTO, @MappingTarget OrderEntity entity);
+    void updateFromDto(OrderDto addressDTO, @MappingTarget Order entity);
 
     @DeepClone
-    OrderEntity clone(OrderEntity entity);
+    Order clone(Order entity);
 }

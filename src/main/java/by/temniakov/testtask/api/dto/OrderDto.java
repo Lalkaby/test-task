@@ -3,7 +3,6 @@ package by.temniakov.testtask.api.dto;
 import by.temniakov.testtask.enums.RegexpConstants;
 import by.temniakov.testtask.enums.Status;
 import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
-import by.temniakov.testtask.validation.annotation.StatusEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -16,14 +15,12 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.List;
 
-import static by.temniakov.testtask.enums.Status.*;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDTO {
-    public static final OrderDTO EMPTY = new OrderDTO();
+public class OrderDto {
+    public static final OrderDto EMPTY = new OrderDto();
 
     private Integer id;
 
@@ -42,14 +39,13 @@ public class OrderDTO {
     private String userEmail;
     
     @NotNull
-    private AddressDTO address;
+    private AddressDto address;
 
-    @StatusEnum(anyOf = {ACTIVE,COMPLETED,CANCELLED},nullable = true)
     private Status status;
 
     // TODO: 10.11.2023 Think about it
     @NotNull
-    private List<GoodDTO> goods;
+    private List<GoodDto> goods;
 
     @Null
     private Integer amount;

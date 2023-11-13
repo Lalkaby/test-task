@@ -1,9 +1,9 @@
 package by.temniakov.testtask.api.controllers.helpers;
 
 import by.temniakov.testtask.api.exceptions.NotFoundException;
-import by.temniakov.testtask.store.entities.AddressEntity;
-import by.temniakov.testtask.store.entities.GoodEntity;
-import by.temniakov.testtask.store.entities.OrderEntity;
+import by.temniakov.testtask.store.entities.Address;
+import by.temniakov.testtask.store.entities.Good;
+import by.temniakov.testtask.store.entities.Order;
 import by.temniakov.testtask.store.repositories.AddressRepository;
 import by.temniakov.testtask.store.repositories.GoodRepository;
 import by.temniakov.testtask.store.repositories.OrderRepository;
@@ -19,7 +19,7 @@ public class ControllerHelper {
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepository;
 
-    public GoodEntity getGoodOrThrowException(Integer goodId){
+    public Good getGoodOrThrowException(Integer goodId){
         return goodRepository
                 .findById(goodId)
                 .orElseThrow(()->
@@ -27,7 +27,7 @@ public class ControllerHelper {
                 );
     }
 
-    public OrderEntity getOrderOrThrowException(Integer orderId){
+    public Order getOrderOrThrowException(Integer orderId){
         return orderRepository
                 .findById(orderId)
                 .orElseThrow(()->
@@ -36,7 +36,7 @@ public class ControllerHelper {
     }
 
 
-    public AddressEntity getAddressOrThrowException(Integer addressId){
+    public Address getAddressOrThrowException(Integer addressId){
         return addressRepository
                 .findById(addressId)
                 .orElseThrow(()->

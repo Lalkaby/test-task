@@ -1,8 +1,7 @@
 package by.temniakov.testtask.api.mappers;
 
-import by.temniakov.testtask.api.dto.GoodDTO;
-import by.temniakov.testtask.api.helpers.OptionalUtils;
-import by.temniakov.testtask.store.entities.GoodEntity;
+import by.temniakov.testtask.api.dto.GoodDto;
+import by.temniakov.testtask.store.entities.Good;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
@@ -14,7 +13,7 @@ public interface GoodMapper extends BaseMapper {
     @Mapping(source = "price", target = "price")
     @Mapping(source = "currency", target = "currency")
     @Mapping(expression = "java(entity.getOrderAssoc().size())", target = "numberOrders")
-    GoodDTO toDTO(GoodEntity entity);
+    GoodDto toDto(Good entity);
 
     @Mapping(source = "id", target = "id", ignore = true)
     @Mapping(source = "title", target = "title")
@@ -24,8 +23,8 @@ public interface GoodMapper extends BaseMapper {
     @Mapping(source = "currency", target = "currency")
     @Mapping(target = "orderAssoc",ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDTO(GoodDTO dto, @MappingTarget GoodEntity entity);
+    void updateFromDto(GoodDto dto, @MappingTarget Good entity);
 
     @Mapping(target = "orderAssoc",ignore = true)
-    GoodEntity cloneEntity(GoodEntity entity);
+    Good clone(Good entity);
 }

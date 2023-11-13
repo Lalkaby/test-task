@@ -1,27 +1,21 @@
 package by.temniakov.testtask.api.dto;
 
 import by.temniakov.testtask.enums.City;
-import by.temniakov.testtask.validation.annotation.CityEnum;
 import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
-import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static by.temniakov.testtask.enums.City.MINSK;
-import static by.temniakov.testtask.enums.City.VITEBSK;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddressDTO {
-    public static final AddressDTO EMPTY = new AddressDTO();
+public class AddressDto {
+    public static final AddressDto EMPTY = new AddressDto();
 
     private Integer id;
 
-    @CityEnum(anyOf = {VITEBSK,MINSK},nullable = true)
     private City city;
 
     @NullOrNotBlank

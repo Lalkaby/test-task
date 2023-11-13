@@ -1,7 +1,7 @@
 package by.temniakov.testtask.api.dto;
 
 import by.temniakov.testtask.enums.City;
-import by.temniakov.testtask.validation.annotation.CityEnum;
+import by.temniakov.testtask.validation.annotation.ValueOfEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -9,16 +9,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static by.temniakov.testtask.enums.City.MINSK;
-import static by.temniakov.testtask.enums.City.VITEBSK;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateAddressDTO {
-    @CityEnum(anyOf = {VITEBSK,MINSK})
-    private City city;
+public class CreateAddressDto {
+    @NotNull(message = "must be not null")
+    @ValueOfEnum(enumClass = City.class)
+    private String city;
 
     @NotBlank(message = "must contains at least one non-whitespace character")
     private String street;

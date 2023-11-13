@@ -1,10 +1,9 @@
 package by.temniakov.testtask.api.controllers;
 
 import by.temniakov.testtask.api.controllers.helpers.ControllerHelper;
-import by.temniakov.testtask.api.dto.GoodDTO;
-import by.temniakov.testtask.api.exceptions.NotFoundException;
+import by.temniakov.testtask.api.dto.GoodDto;
 import by.temniakov.testtask.api.mappers.GoodMapper;
-import by.temniakov.testtask.store.entities.GoodEntity;
+import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.repositories.GoodRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,39 +31,39 @@ public class GoodController {
     public static final String UPDATE_GOOD = "/goods/{id_good}";
 
     @GetMapping(GET_GOOD)
-    public ResponseEntity<GoodDTO> getGood(@PathVariable(name = "id_good") Integer goodId){
-        Optional<GoodEntity> optionalGood = goodRepository.findById(goodId);
-        return ResponseEntity.of(optionalGood.map(goodMapper::toDTO));
+    public ResponseEntity<GoodDto> getGood(@PathVariable(name = "id_good") Integer goodId){
+        Optional<Good> optionalGood = goodRepository.findById(goodId);
+        return ResponseEntity.of(optionalGood.map(goodMapper::toDto));
     }
 
     @GetMapping(GET_GOODS)
-    public ResponseEntity<GoodDTO> getGoods(){
+    public ResponseEntity<GoodDto> getGoods(){
         throw  new UnsupportedOperationException("Not implemented");
     }
 
     @PostMapping(CREATE_GOOD)
-    public ResponseEntity<GoodDTO> createGood(){
+    public ResponseEntity<GoodDto> createGood(){
         throw  new UnsupportedOperationException("Not implemented");
     }
 
     @DeleteMapping(DELETE_GOOD)
-    public ResponseEntity<GoodDTO> deleteGood(@PathVariable(name = "id_good") String goodId){
+    public ResponseEntity<GoodDto> deleteGood(@PathVariable(name = "id_good") String goodId){
         throw  new UnsupportedOperationException("Not implemented");
     }
 
 
     @PatchMapping(value = UPDATE_GOOD)
-    public ResponseEntity<GoodDTO> updateGood(
-            @PathVariable(name = "id_good") Integer goodId, @Valid @RequestBody GoodDTO goodDTO){
-        GoodEntity good = controllerHelper.getGoodOrThrowException(goodId);
+    public ResponseEntity<GoodDto> updateGood(
+            @PathVariable(name = "id_good") Integer goodId, @Valid @RequestBody GoodDto goodDTO){
+        Good good = controllerHelper.getGoodOrThrowException(goodId);
 
-        GoodEntity cloneGood = goodMapper.cloneEntity(good);
-        goodMapper.updateEntityFromDTO(goodDTO,good);
+        Good cloneGood = goodMapper.clone(good);
+        goodMapper.updateFromDto(goodDTO,good);
         if (!cloneGood.equals(good)){
             goodRepository.saveAndFlush(good);
         }
 
-        return ResponseEntity.of(Optional.of(good).map(goodMapper::toDTO));
+        return ResponseEntity.of(Optional.of(good).map(goodMapper::toDto));
 
     }
 }

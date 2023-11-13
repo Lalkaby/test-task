@@ -1,7 +1,6 @@
 package by.temniakov.testtask.api.dto;
 
 import by.temniakov.testtask.enums.Currency;
-import by.temniakov.testtask.validation.annotation.CurrencyEnum;
 import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
@@ -12,14 +11,12 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-import static by.temniakov.testtask.enums.Currency.*;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GoodDTO {
-    public static final GoodDTO EMPTY = new GoodDTO();
+public class GoodDto {
+    public static final GoodDto EMPTY = new GoodDto();
 
     private Integer id;
 
@@ -34,7 +31,6 @@ public class GoodDTO {
     private String producer;
 
     @Null
-    @CurrencyEnum(anyOf = {BYN,USD,RUB},nullable = true)
     private Currency currency;
 
     @DecimalMin(value = "0", message = "Price must be more than 0", inclusive = false)

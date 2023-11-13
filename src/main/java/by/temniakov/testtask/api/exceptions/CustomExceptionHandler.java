@@ -51,14 +51,14 @@ public class CustomExceptionHandler {
         return problemDetail;
     }
 
-    @Order()
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail anyExceptionHandler(Exception ex){
-        ProblemDetail problemDetail = ProblemDetail.forStatus(200);
-        problemDetail.setDetail(ex.getClass().toString() + ex.getMessage() + Arrays.toString(ex.getStackTrace()));
-        System.err.println(Arrays.toString(ex.getStackTrace()));
-        return problemDetail;
-    }
+//    @Order()
+//    @ExceptionHandler(Exception.class)
+//    public ProblemDetail anyExceptionHandler(Exception ex){
+//        ProblemDetail problemDetail = ProblemDetail.forStatus(200);
+//        problemDetail.setDetail(ex.getClass().toString() + ex.getMessage() + Arrays.toString(ex.getStackTrace()));
+//        System.err.println(Arrays.toString(ex.getStackTrace()));
+//        return problemDetail;
+//    }
 
     record FieldError(String field, String message){}
 }
