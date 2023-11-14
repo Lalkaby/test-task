@@ -3,9 +3,7 @@ package by.temniakov.testtask.api.mappers;
 import by.temniakov.testtask.api.dto.AddressDto;
 import by.temniakov.testtask.api.dto.CreateAddressDto;
 import by.temniakov.testtask.store.entities.Address;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface AddressMapper extends BaseMapper{
@@ -25,6 +23,7 @@ public interface AddressMapper extends BaseMapper{
     @Mapping(source = "street",target = "street")
     @Mapping(source = "house",target = "house")
     @Mapping(target = "orders", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateFromDto(AddressDto addressDTO, @MappingTarget Address address);
 
 

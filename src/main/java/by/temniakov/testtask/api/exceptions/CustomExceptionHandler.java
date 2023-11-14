@@ -27,6 +27,17 @@ public class CustomExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(InUseException.class)
+    public ProblemDetail entityInUseHandler(InUseException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problemDetail.setType(URI.create("https://developer.mozilla.org/ru/docs/Web/HTTP/Status/409"));
+        problemDetail.setTitle("In use");
+        problemDetail.setDetail(exception.getMessage());
+        problemDetail.setProperty("id",exception.getId());
+        return problemDetail;
+    }
+
+
 //    @ExceptionHandler(HttpMessageNotReadableException.class)
 //    public ProblemDetail messageNotReadableHandler(HttpMessageNotReadableException exception){
 //        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);

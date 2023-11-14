@@ -22,7 +22,7 @@ public class GoodDto {
     @NullOrNotBlank(message = "must be null or not blank")
     private String title;
 
-    @Min(value = 0, message = "Amount must be not less than 0")
+    @Min(value = 0, message = "amount must be not less than 0")
     @Max(value = Integer.MAX_VALUE)
     private Integer amount;
 
@@ -32,8 +32,8 @@ public class GoodDto {
     @ValueOfEnum(enumClass = Currency.class, nullable = true)
     private String currency;
 
-    @DecimalMin(value = "0", message = "Price must be more than 0", inclusive = false)
-    @DecimalMax(value = "100", message = "Price must be less than 100", inclusive = false)
+    @DecimalMin(value = "0", message = "price must be more than 0", inclusive = false)
+    @DecimalMax(value = "100", message = "price must be less than 100", inclusive = false)
     private BigDecimal price;
 
     @JsonProperty(value = "number_orders")
@@ -41,7 +41,7 @@ public class GoodDto {
     private Integer numberOrders;
 
 
-    public @Min(value = 0, message = "Amount must be not less than 0") @Max(value = Integer.MAX_VALUE) Integer getAmount() {
+    public @Min(value = 0, message = "amount must be not less than 0") @Max(value = Integer.MAX_VALUE) Integer getAmount() {
         return this.amount;
     }
 }

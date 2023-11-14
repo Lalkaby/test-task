@@ -12,7 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateAddressDto {
-    @NotNull(message = "must be not null")
     @ValueOfEnum(enumClass = City.class)
     private String city;
 

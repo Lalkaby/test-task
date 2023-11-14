@@ -33,6 +33,6 @@ public class Address {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "address",
-            targetEntity = Orders.class )
+            targetEntity = Orders.class, fetch = FetchType.LAZY)
     private List<Orders> orders = new ArrayList<>();
 }
