@@ -31,24 +31,36 @@ public interface BaseMapper {
         return null;
     }
 
-    default Currency mapToCurrency(Object value) {
-        if (value instanceof Currency) {
-            return (Currency) value;
+    default Currency mapToCurrency(String  value) {
+        if (value != null) {
+            return Currency.valueOf(value) ;
         }
         return null;
     }
 
-    default Status mapToStatus(Object value){
-        if (value instanceof Status) {
-            return (Status) value;
+    default Status mapToStatus(String value){
+        if (value != null) {
+            return Status.valueOf(value) ;
         }
         return null;
     }
 
-    default City mapToCity(Object value){
-        if (value instanceof City) {
-            return (City) value;
+    default City mapToCity(String value){
+        if (value != null) {
+            return City.valueOf(value) ;
         }
         return null;
+    }
+
+    default String currencyToString(Currency value) {
+        return value.name();
+    }
+
+    default String statusToString(Status value){
+        return value.name();
+    }
+
+    default String cityToString(City value){
+        return value.name();
     }
 }

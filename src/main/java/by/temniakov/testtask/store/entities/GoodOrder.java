@@ -20,11 +20,11 @@ public class GoodOrder {
     private Good good;
 
     @Id
-    @ManyToOne(targetEntity = Order.class)
+    @ManyToOne(targetEntity = Orders.class)
     @JoinColumn(name = "id_order", referencedColumnName = "id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Order order;
+    private Orders order;
 
     @Column
     @Min(value = 0, message = "Amount cannot be less then 0")

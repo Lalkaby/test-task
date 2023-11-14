@@ -1,6 +1,6 @@
 package by.temniakov.testtask.enums;
 
-public enum Currency {
+public enum Currency{
     BYN,
     RUB,
     USD;

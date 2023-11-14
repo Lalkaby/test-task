@@ -60,7 +60,7 @@ public class GoodController {
         Good cloneGood = goodMapper.clone(good);
         goodMapper.updateFromDto(goodDTO,good);
         if (!cloneGood.equals(good)){
-            goodRepository.saveAndFlush(good);
+           good =  goodRepository.saveAndFlush(good);
         }
 
         return ResponseEntity.of(Optional.of(good).map(goodMapper::toDto));

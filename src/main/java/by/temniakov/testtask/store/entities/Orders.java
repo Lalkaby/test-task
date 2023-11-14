@@ -11,12 +11,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order {
+public class Orders {
     @Id
     private Integer id;
 

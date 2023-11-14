@@ -11,7 +11,7 @@ public interface GoodMapper extends BaseMapper {
     @Mapping(source = "amount", target = "amount")
     @Mapping(source = "producer", target = "producer")
     @Mapping(source = "price", target = "price")
-    @Mapping(source = "currency", target = "currency")
+    @Mapping(source = "currency",target = "currency")
     @Mapping(expression = "java(entity.getOrderAssoc().size())", target = "numberOrders")
     GoodDto toDto(Good entity);
 

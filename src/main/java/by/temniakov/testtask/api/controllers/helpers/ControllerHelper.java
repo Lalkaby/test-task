@@ -3,7 +3,7 @@ package by.temniakov.testtask.api.controllers.helpers;
 import by.temniakov.testtask.api.exceptions.NotFoundException;
 import by.temniakov.testtask.store.entities.Address;
 import by.temniakov.testtask.store.entities.Good;
-import by.temniakov.testtask.store.entities.Order;
+import by.temniakov.testtask.store.entities.Orders;
 import by.temniakov.testtask.store.repositories.AddressRepository;
 import by.temniakov.testtask.store.repositories.GoodRepository;
 import by.temniakov.testtask.store.repositories.OrderRepository;
@@ -27,7 +27,7 @@ public class ControllerHelper {
                 );
     }
 
-    public Order getOrderOrThrowException(Integer orderId){
+    public Orders getOrderOrThrowException(Integer orderId){
         return orderRepository
                 .findById(orderId)
                 .orElseThrow(()->

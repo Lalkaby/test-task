@@ -27,15 +27,15 @@ public class CustomExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ProblemDetail messageNotReadableHandler(HttpMessageNotReadableException exception){
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problemDetail.setType(URI.create("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"));
-        problemDetail.setTitle("Conversion error.");
-        problemDetail.setDetail(exception.getMessage());
-
-        return problemDetail;
-    }
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public ProblemDetail messageNotReadableHandler(HttpMessageNotReadableException exception){
+//        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+//        problemDetail.setType(URI.create("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"));
+//        problemDetail.setTitle("Conversion error.");
+//        problemDetail.setDetail(exception.getMessage());
+//
+//        return problemDetail;
+//    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail validationHandler(MethodArgumentNotValidException exception){

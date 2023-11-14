@@ -2,12 +2,11 @@ package by.temniakov.testtask.api.dto;
 
 import by.temniakov.testtask.enums.City;
 import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import by.temniakov.testtask.validation.annotation.ValueOfEnum;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,7 +15,8 @@ public class AddressDto {
 
     private Integer id;
 
-    private City city;
+    @ValueOfEnum(enumClass = City.class, nullable = true)
+    private String city;
 
     @NullOrNotBlank
     private String street;

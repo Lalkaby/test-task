@@ -2,16 +2,15 @@ package by.temniakov.testtask.api.dto;
 
 import by.temniakov.testtask.enums.Currency;
 import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
+import by.temniakov.testtask.validation.annotation.ValueOfEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -20,7 +19,7 @@ public class GoodDto {
 
     private Integer id;
 
-    @NullOrNotBlank
+    @NullOrNotBlank(message = "must be null or not blank")
     private String title;
 
     @Min(value = 0, message = "Amount must be not less than 0")
@@ -30,8 +29,8 @@ public class GoodDto {
     @NullOrNotBlank
     private String producer;
 
-    @Null
-    private Currency currency;
+    @ValueOfEnum(enumClass = Currency.class, nullable = true)
+    private String currency;
 
     @DecimalMin(value = "0", message = "Price must be more than 0", inclusive = false)
     @DecimalMax(value = "100", message = "Price must be less than 100", inclusive = false)
@@ -40,4 +39,9 @@ public class GoodDto {
     @JsonProperty(value = "number_orders")
     @Null
     private Integer numberOrders;
+
+
+    public @Min(value = 0, message = "Amount must be not less than 0") @Max(value = Integer.MAX_VALUE) Integer getAmount() {
+        return this.amount;
+    }
 }
