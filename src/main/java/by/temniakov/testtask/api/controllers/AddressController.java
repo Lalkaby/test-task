@@ -2,22 +2,25 @@ package by.temniakov.testtask.api.controllers;
 
 import by.temniakov.testtask.api.controllers.helpers.ControllerHelper;
 import by.temniakov.testtask.api.dto.AddressDto;
-import by.temniakov.testtask.api.dto.CreateAddressDto;
 import by.temniakov.testtask.api.exceptions.InUseException;
 import by.temniakov.testtask.api.mappers.AddressMapper;
 import by.temniakov.testtask.store.entities.Address;
-import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.repositories.AddressRepository;
 import by.temniakov.testtask.store.repositories.OrderRepository;
-import jakarta.validation.Valid;
+import by.temniakov.testtask.validation.groups.AnyInfo;
+import by.temniakov.testtask.validation.groups.CreationInfo;
+import by.temniakov.testtask.validation.groups.IdNullInfo;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -27,7 +30,6 @@ import java.util.Optional;
 @Slf4j
 public class AddressController {
     private final AddressMapper addressMapper;
-    private final OrderRepository orderRepository;
     private final ControllerHelper controllerHelper;
     private final AddressRepository addressRepository;
 
@@ -45,28 +47,44 @@ public class AddressController {
         return ResponseEntity.of(Optional.of(address).map(addressMapper::toDto));
     }
 
+    @GetMapping(FETCH_ADDRESSES)
+    public ResponseEntity<List<AddressDto>> fetchAddresses(
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "50") Integer size){
+        return ResponseEntity.of(
+                Optional.of(
+                        addressRepository
+                                .findAll(PageRequest.of(page,size))
+                                .map(addressMapper::toDto)
+                                .toList()
+                )
+        );
+    }
+
     @PatchMapping(UPDATE_ADDRESS)
     public ResponseEntity<AddressDto> updateAddress(
-            @PathVariable(name = "id_address") Integer addressId, @RequestBody @Valid AddressDto addressDto)
+            @PathVariable(name = "id_address") Integer addressId,
+            @RequestBody @Validated(value = {AnyInfo.class, IdNullInfo.class}) AddressDto addressDto)
     {
         Address address = controllerHelper.getAddressOrThrowException(addressId);
 
         Address cloneAddress = addressMapper.clone(address);
         addressMapper.updateFromDto(addressDto,address);
+        Address savedAddress = address;
         if (!cloneAddress.equals(address)){
-            addressMapper.updateFromDto(addressDto,cloneAddress);
-            address = addressRepository
-                    .findOne(Example.of(address, ExampleMatcher.matching().withIgnorePaths("orders")))
-                    .orElseGet(()->addressRepository.saveAndFlush(cloneAddress));
+            savedAddress = addressRepository
+                    .findOne(Example.of(address, ExampleMatcher.matching().withIgnorePaths("id")))
+                    .orElseGet(()->addressRepository.saveAndFlush(address));
         }
 
-        return ResponseEntity.of(Optional.of(address).map(addressMapper::toDto));
+        return ResponseEntity.of(Optional.of(savedAddress).map(addressMapper::toDto));
     }
+
 
     @PostMapping(CREATE_ADDRESS)
     public ResponseEntity<AddressDto> createAddress(
-            @RequestBody @Valid CreateAddressDto createAddressDTO){
-        Address address = addressMapper.fromDto(createAddressDTO);
+            @RequestBody @Validated(value = {CreationInfo.class}) AddressDto createAddressDto){
+        Address address = addressMapper.fromDto(createAddressDto);
         Address savedAddress = addressRepository
                 .findOne(Example.of(address))
                 .orElseGet(()->addressRepository.saveAndFlush(address));

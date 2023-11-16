@@ -1,7 +1,6 @@
 package by.temniakov.testtask.api.mappers;
 
 import by.temniakov.testtask.api.dto.AddressDto;
-import by.temniakov.testtask.api.dto.CreateAddressDto;
 import by.temniakov.testtask.store.entities.Address;
 import org.mapstruct.*;
 
@@ -13,10 +12,12 @@ public interface AddressMapper extends BaseMapper{
     @Mapping(source = "house",target = "house")
     AddressDto toDto(Address address);
 
+    @Mapping(source = "id", target = "id")
     @Mapping(source = "city",target = "city")
     @Mapping(source = "street",target = "street")
     @Mapping(source = "house",target = "house")
-    Address fromDto(CreateAddressDto addressDTO);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Address fromDto(AddressDto addressDTO);
 
     @Mapping(source = "id", target = "id", ignore = true)
     @Mapping(source = "city",target = "city")

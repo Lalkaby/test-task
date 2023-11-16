@@ -29,7 +29,7 @@ public class GoodDto {
     @NullOrNotBlank
     private String producer;
 
-    @ValueOfEnum(enumClass = Currency.class, nullable = true)
+    @ValueOfEnum(enumClass = Currency.class)
     private String currency;
 
     @DecimalMin(value = "0", message = "price must be more than 0", inclusive = false)

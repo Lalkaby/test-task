@@ -40,7 +40,7 @@ public class OrderDto {
     @NotNull
     private AddressDto address;
 
-    @ValueOfEnum(enumClass = Status.class, nullable = true)
+    @ValueOfEnum(enumClass = Status.class)
     private String status;
 
     // TODO: 10.11.2023 Think about it
