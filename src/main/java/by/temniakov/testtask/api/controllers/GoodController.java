@@ -2,20 +2,29 @@ package by.temniakov.testtask.api.controllers;
 
 import by.temniakov.testtask.api.controllers.helpers.ControllerHelper;
 import by.temniakov.testtask.api.dto.GoodDto;
+import by.temniakov.testtask.api.exceptions.InUseException;
 import by.temniakov.testtask.api.mappers.GoodMapper;
 import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.repositories.GoodRepository;
+import by.temniakov.testtask.validation.groups.CreationInfo;
+import by.temniakov.testtask.validation.groups.UpdateInfo;
+import by.temniakov.testtask.validation.groups.IdNullInfo;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
-@Log4j2
 @Validated
+@Transactional
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -25,7 +34,7 @@ public class GoodController {
     private final ControllerHelper controllerHelper;
 
     public static final String GET_GOOD = "/good/{id_good}";
-    public static final String GET_GOODS  = "/goods";
+    public static final String FETCH_GOODS = "/goods";
     public static final String CREATE_GOOD  = "/goods";
     public static final String DELETE_GOOD  = "/goods/{id_good}";
     public static final String UPDATE_GOOD = "/goods/{id_good}";
@@ -36,34 +45,62 @@ public class GoodController {
         return ResponseEntity.of(optionalGood.map(goodMapper::toDto));
     }
 
-    @GetMapping(GET_GOODS)
-    public ResponseEntity<GoodDto> getGoods(){
-        throw  new UnsupportedOperationException("Not implemented");
+    @GetMapping(FETCH_GOODS)
+    public ResponseEntity<List<GoodDto>> fetchGoods(
+            @RequestParam(name = "page", defaultValue = "0")
+            @Min(value = 0, message = "must be not less than 0") Integer page,
+            @RequestParam(name = "size", defaultValue = "50")
+            @Min(value = 1,message = "must be not less than 1") Integer size){
+        return ResponseEntity.of(
+                Optional.of(
+                        goodRepository
+                                .findAll(PageRequest.of(page,size))
+                                .map(goodMapper::toDto)
+                                .toList()
+                )
+        );
     }
+
 
     @PostMapping(CREATE_GOOD)
-    public ResponseEntity<GoodDto> createGood(){
-        throw  new UnsupportedOperationException("Not implemented");
-    }
+    public ResponseEntity<GoodDto> createGood(
+            @RequestBody @Validated(value = {CreationInfo.class, Default.class}) GoodDto createGoodDto){
+        Good good = goodMapper.fromDto(createGoodDto);
+        Good savedGood = goodRepository
+                .findOne(Example.of(good))
+                .orElseGet(()->goodRepository.saveAndFlush(good));
 
-    @DeleteMapping(DELETE_GOOD)
-    public ResponseEntity<GoodDto> deleteGood(@PathVariable(name = "id_good") String goodId){
-        throw  new UnsupportedOperationException("Not implemented");
+        return ResponseEntity.of(Optional.of(savedGood).map(goodMapper::toDto));
     }
-
 
     @PatchMapping(value = UPDATE_GOOD)
     public ResponseEntity<GoodDto> updateGood(
-            @PathVariable(name = "id_good") Integer goodId, @Valid @RequestBody GoodDto goodDTO){
+            @PathVariable(name = "id_good") Integer goodId,
+            @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class}) @RequestBody GoodDto goodDTO){
         Good good = controllerHelper.getGoodOrThrowException(goodId);
 
         Good cloneGood = goodMapper.clone(good);
-        goodMapper.updateFromDto(goodDTO,good);
+        goodMapper.updateFromDto(goodDTO,cloneGood);
+        Good savedGood = cloneGood;
         if (!cloneGood.equals(good)){
-           good =  goodRepository.saveAndFlush(good);
+           savedGood =  goodRepository
+                   .findOne(Example.of(cloneGood, controllerHelper.getExampleMatcherWithIgnoreIdPath()))
+                   .orElseGet(()->goodRepository.saveAndFlush(cloneGood));
         }
 
-        return ResponseEntity.of(Optional.of(good).map(goodMapper::toDto));
+        return ResponseEntity.of(Optional.of(savedGood).map(goodMapper::toDto));
+    }
 
+    @DeleteMapping(DELETE_GOOD)
+    public ResponseEntity<GoodDto> deleteGood(@PathVariable(name = "id_good") Integer goodId){
+        Good good = controllerHelper.getGoodOrThrowException(goodId);
+
+        if (!good.getOrderAssoc().isEmpty()){
+            throw new InUseException("Good is still in use",goodId);
+        }
+
+        goodRepository.delete(good);
+
+        return ResponseEntity.ok().build();
     }
 }

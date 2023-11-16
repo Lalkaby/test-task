@@ -6,28 +6,28 @@ import by.temniakov.testtask.api.exceptions.InUseException;
 import by.temniakov.testtask.api.mappers.AddressMapper;
 import by.temniakov.testtask.store.entities.Address;
 import by.temniakov.testtask.store.repositories.AddressRepository;
-import by.temniakov.testtask.store.repositories.OrderRepository;
-import by.temniakov.testtask.validation.groups.AnyInfo;
+import by.temniakov.testtask.validation.groups.UpdateInfo;
 import by.temniakov.testtask.validation.groups.CreationInfo;
 import by.temniakov.testtask.validation.groups.IdNullInfo;
-import lombok.Builder;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-@RestController
 @Validated
-@RequiredArgsConstructor
+@Transactional
+@RestController
 @RequestMapping("/api")
-@Slf4j
+@RequiredArgsConstructor
 public class AddressController {
     private final AddressMapper addressMapper;
     private final ControllerHelper controllerHelper;
@@ -49,8 +49,10 @@ public class AddressController {
 
     @GetMapping(FETCH_ADDRESSES)
     public ResponseEntity<List<AddressDto>> fetchAddresses(
-            @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "50") Integer size){
+            @RequestParam(name = "page", defaultValue = "0")
+            @Min(value = 0, message = "must be not less than 0") Integer page,
+            @RequestParam(name = "size", defaultValue = "50")
+            @Min(value = 1,message = "must be not less than 1") Integer size){
         return ResponseEntity.of(
                 Optional.of(
                         addressRepository
@@ -64,17 +66,17 @@ public class AddressController {
     @PatchMapping(UPDATE_ADDRESS)
     public ResponseEntity<AddressDto> updateAddress(
             @PathVariable(name = "id_address") Integer addressId,
-            @RequestBody @Validated(value = {AnyInfo.class, IdNullInfo.class}) AddressDto addressDto)
+            @RequestBody @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class}) AddressDto addressDto)
     {
         Address address = controllerHelper.getAddressOrThrowException(addressId);
 
         Address cloneAddress = addressMapper.clone(address);
-        addressMapper.updateFromDto(addressDto,address);
-        Address savedAddress = address;
+        addressMapper.updateFromDto(addressDto,cloneAddress);
+        Address savedAddress = cloneAddress;
         if (!cloneAddress.equals(address)){
             savedAddress = addressRepository
-                    .findOne(Example.of(address, ExampleMatcher.matching().withIgnorePaths("id")))
-                    .orElseGet(()->addressRepository.saveAndFlush(address));
+                    .findOne(Example.of(cloneAddress, controllerHelper.getExampleMatcherWithIgnoreIdPath()))
+                    .orElseGet(()->addressRepository.saveAndFlush(cloneAddress));
         }
 
         return ResponseEntity.of(Optional.of(savedAddress).map(addressMapper::toDto));
@@ -83,7 +85,7 @@ public class AddressController {
 
     @PostMapping(CREATE_ADDRESS)
     public ResponseEntity<AddressDto> createAddress(
-            @RequestBody @Validated(value = {CreationInfo.class}) AddressDto createAddressDto){
+            @RequestBody @Validated(value = {CreationInfo.class, Default.class}) AddressDto createAddressDto){
         Address address = addressMapper.fromDto(createAddressDto);
         Address savedAddress = addressRepository
                 .findOne(Example.of(address))

@@ -16,6 +16,7 @@ public interface AddressMapper extends BaseMapper{
     @Mapping(source = "city",target = "city")
     @Mapping(source = "street",target = "street")
     @Mapping(source = "house",target = "house")
+    @Mapping(target = "orders", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Address fromDto(AddressDto addressDTO);
 

@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Good {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column
