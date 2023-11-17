@@ -6,6 +6,7 @@ import by.temniakov.testtask.validation.annotation.ValueOfEnum;
 import by.temniakov.testtask.validation.groups.UpdateInfo;
 import by.temniakov.testtask.validation.groups.CreationInfo;
 import by.temniakov.testtask.validation.groups.IdNullInfo;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import jakarta.validation.groups.Default;
@@ -44,6 +45,7 @@ public class GoodDto {
     @DecimalMax(value = "100", message = "price must be less than 100", inclusive = false)
     private BigDecimal price;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty(value = "number_orders")
     @Null(message = "must be null")
     private Integer numberOrders;

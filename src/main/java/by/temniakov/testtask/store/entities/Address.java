@@ -3,6 +3,7 @@ package by.temniakov.testtask.store.entities;
 import by.temniakov.testtask.enums.City;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,5 +35,6 @@ public class Address {
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "address",
             targetEntity = Orders.class, fetch = FetchType.LAZY)
+    @BatchSize(size = 25)
     private List<Orders> orders = new ArrayList<>();
 }

@@ -57,7 +57,7 @@ public class CustomExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setType(URI.create("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"));
         problemDetail.setTitle("Validation error.");
-        List<FieldError> fieldErrors = exception.getConstraintViolations()
+        List<ParamError> paramErrors = exception.getConstraintViolations()
                 .stream()
                 .map(ex -> {
                     String input = ex.getPropertyPath().toString();
@@ -65,10 +65,22 @@ public class CustomExceptionHandler {
                     if (dotIndex != -1) {
                         input = input.substring(dotIndex + 1);
                     }
-                    return new FieldError(input, ex.getMessage());
+                    return new ParamError(input, ex.getMessage());
                 })
                 .toList();
-        problemDetail.setProperty("invalidFields",fieldErrors);
+        problemDetail.setProperty("invalidParams",paramErrors);
+        return problemDetail;
+    }
+
+    @ExceptionHandler(UpdateOrderStatusException.class)
+    public ProblemDetail orderStatusHandler(UpdateOrderStatusException exception){
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setType(URI.create("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"));
+        problemDetail.setTitle("Invalid status.");
+        problemDetail.setDetail(exception.getMessage());
+        problemDetail.setProperty("currentStatus",exception.getCurrentStatus());
+        problemDetail.setProperty("newStatus",exception.getNewStatus());
+        problemDetail.setProperty("orderId",exception.getId());
         return problemDetail;
     }
 
@@ -82,4 +94,5 @@ public class CustomExceptionHandler {
 //    }
 
     record FieldError(String field, String message){}
+    record ParamError(String param, String message){}
 }

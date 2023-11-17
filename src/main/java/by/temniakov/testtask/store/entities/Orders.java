@@ -6,6 +6,7 @@ import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -51,8 +52,9 @@ public class Orders {
     @Builder.Default
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @OneToMany(mappedBy = "order",
-            targetEntity = GoodOrder.class)
+    @OneToMany(mappedBy = "order",cascade = CascadeType.REMOVE,
+            targetEntity = GoodOrder.class, fetch = FetchType.LAZY)
+    @BatchSize(size = 25)
     private List<GoodOrder> goodAssoc = new ArrayList<>();
 }
 

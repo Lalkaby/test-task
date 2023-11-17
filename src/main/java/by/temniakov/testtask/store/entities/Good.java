@@ -3,6 +3,7 @@ package by.temniakov.testtask.store.entities;
 import by.temniakov.testtask.enums.Currency;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class Good {
     @Builder.Default
     @OneToMany(mappedBy = "good",
             targetEntity = GoodOrder.class,fetch = FetchType.LAZY)
+    @BatchSize(size = 25)
     private List<GoodOrder> orderAssoc = new ArrayList<>();
 }
 
