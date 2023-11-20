@@ -30,7 +30,7 @@ public class GoodDto {
     private String title;
 
     @Min(value = 0, message = "amount must be not less than 0")
-    @Max(value = Integer.MAX_VALUE)
+    @Max(value = Integer.MAX_VALUE, message = "amount must be less than integer max value")
     private Integer amount ;
 
     @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
@@ -45,8 +45,7 @@ public class GoodDto {
     @DecimalMax(value = "100", message = "price must be less than 100", inclusive = false)
     private BigDecimal price;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty(value = "number_orders")
     @Null(message = "must be null")
-    private Integer numberOrders;
+    private Integer numberOrders = 0;
 }

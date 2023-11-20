@@ -13,14 +13,14 @@ import lombok.*;
 @IdClass(GoodOrderId.class)
 public class GoodOrder {
     @Id
-    @ManyToOne(targetEntity = Good.class,fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Good.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "id_good", referencedColumnName = "id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Good good;
 
     @Id
-    @ManyToOne(targetEntity = Orders.class,fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Orders.class,cascade = CascadeType.ALL)
     @JoinColumn(name = "id_order", referencedColumnName = "id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

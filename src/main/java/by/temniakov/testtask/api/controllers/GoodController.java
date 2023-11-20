@@ -3,30 +3,24 @@ package by.temniakov.testtask.api.controllers;
 import by.temniakov.testtask.api.controllers.helpers.ControllerHelper;
 import by.temniakov.testtask.api.dto.GoodDto;
 import by.temniakov.testtask.api.exceptions.InUseException;
-import by.temniakov.testtask.api.exceptions.NotFoundException;
 import by.temniakov.testtask.api.mappers.GoodMapper;
 import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.repositories.GoodRepository;
-import by.temniakov.testtask.validation.annotation.AllowSortFields;
 import by.temniakov.testtask.validation.groups.CreationInfo;
 import by.temniakov.testtask.validation.groups.IdNullInfo;
 import by.temniakov.testtask.validation.groups.UpdateInfo;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.jaxb.SpringDataJaxb;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,8 +43,8 @@ public class GoodController {
 
     @GetMapping(GET_GOOD)
     public ResponseEntity<GoodDto> getGood(@PathVariable(name = "id_good") Integer goodId){
-        Optional<Good> optionalGood = goodRepository.findById(goodId);
-        return ResponseEntity.of(optionalGood.map(goodMapper::toDto));
+        Good good = controllerHelper.getGoodOrThrowException(goodId);
+        return ResponseEntity.of(Optional.of(good).map(goodMapper::toDto));
     }
 
     @GetMapping(FETCH_GOODS)
@@ -73,12 +67,12 @@ public class GoodController {
     public ResponseEntity<List<GoodDto>> fetchSortedGoods(
             @Pattern(regexp = "price|amount", message = "must be one of {regexp}")
             @RequestParam(name = "field") String field,
-            @RequestParam(name = "order", defaultValue = "desc") String order,
+            @RequestParam(name = "order", defaultValue = "asc") String order,
             @Min(value = 0, message = "must be not less than 0")
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @Min(value = 1,message = "must be not less than 1")
             @RequestParam(name = "size", defaultValue = "50")Integer size){
-        Sort.Direction direction = Sort.Direction.fromOptionalString(order).orElse(Sort.Direction.DESC);
+        Sort.Direction direction = Sort.Direction.fromOptionalString(order).orElse(Sort.Direction.ASC);
         PageRequest pageRequest = PageRequest.of(page,size, direction,field);
 
         return ResponseEntity.of(
@@ -90,8 +84,6 @@ public class GoodController {
                 )
         );
     }
-
-
 
     @PostMapping(CREATE_GOOD)
     public ResponseEntity<GoodDto> createGood(

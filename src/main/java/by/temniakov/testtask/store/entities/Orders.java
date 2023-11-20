@@ -16,6 +16,7 @@ import java.util.List;
 @Setter
 @Entity
 @Builder
+@BatchSize(size = 25)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Orders {
