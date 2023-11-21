@@ -4,8 +4,8 @@ import by.temniakov.testtask.api.dto.AddressDto;
 import by.temniakov.testtask.store.entities.Address;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
-public interface AddressMapper extends BaseMapper{
+@Mapper(componentModel = "spring", uses = {BaseMapper.class})
+public interface AddressMapper{
     @Mapping(source = "id", target = "id")
     @Mapping(source = "city",target = "city")
     @Mapping(source = "street",target = "street")

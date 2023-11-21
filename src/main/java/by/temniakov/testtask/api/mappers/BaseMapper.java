@@ -3,8 +3,9 @@ package by.temniakov.testtask.api.mappers;
 import by.temniakov.testtask.enums.City;
 import by.temniakov.testtask.enums.Currency;
 import by.temniakov.testtask.enums.Status;
+import org.mapstruct.Mapper;
 
-
+@Mapper(componentModel = "spring")
 public interface BaseMapper {
     default Integer mapToInt(Object value) {
         if (value instanceof Integer) {

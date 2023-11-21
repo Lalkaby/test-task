@@ -1,6 +1,7 @@
 package by.temniakov.testtask.api.controllers.helpers;
 
 import by.temniakov.testtask.api.exceptions.NotFoundException;
+import by.temniakov.testtask.api.services.OrderService;
 import by.temniakov.testtask.store.entities.Address;
 import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.entities.Orders;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ControllerHelper {
     private final GoodRepository goodRepository;
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
     private final AddressRepository addressRepository;
     @Getter
     private final ExampleMatcher exampleMatcherWithIgnoreIdPath;
@@ -33,7 +34,7 @@ public class ControllerHelper {
     }
 
     public Orders getOrderOrThrowException(Integer orderId){
-        return orderRepository
+        return orderService
                 .findById(orderId)
                 .orElseThrow(()->
                         new NotFoundException("Order doesn't exists.", orderId)

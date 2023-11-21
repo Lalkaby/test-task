@@ -24,7 +24,7 @@ public class CustomExceptionHandler {
         problemDetail.setType(URI.create("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"));
         problemDetail.setTitle("Not found.");
         problemDetail.setDetail(exception.getMessage());
-        problemDetail.setProperty("id", exception.getId());
+        problemDetail.setProperty("ids", exception.getIds());
         return problemDetail;
     }
 

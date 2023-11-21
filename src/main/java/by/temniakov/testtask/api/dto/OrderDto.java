@@ -7,19 +7,23 @@ import by.temniakov.testtask.validation.annotation.ValueOfEnum;
 import by.temniakov.testtask.validation.groups.CreationInfo;
 import by.temniakov.testtask.validation.groups.IdNullInfo;
 import by.temniakov.testtask.validation.groups.UpdateInfo;
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import jakarta.validation.groups.Default;
 import lombok.*;
+import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
 @Getter
 @Setter
 @Builder
+@Validated
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDto {
@@ -47,6 +51,7 @@ public class OrderDto {
     @JsonProperty(value = "user_email")
     private String userEmail;
 
+    @Valid
     @NotNull(message = "must be not null", groups = CreationInfo.class)
     private AddressDto address;
 
@@ -54,14 +59,19 @@ public class OrderDto {
     @ValueOfEnum(enumClass = Status.class, groups = {CreationInfo.class, UpdateInfo.class, Default.class})
     private String status;
 
-    // TODO: 10.11.2023 Think about it
-    @NotNull
+    @Null(message = "must be null")
     private List<GoodDto> goods;
 
+    @Valid
+    @JsonIgnore
     private List<GoodOrderDto> goodOrders;
 
-    @Min(value = 0, message = "amount must be not less than 0")
-    @Max(value = Integer.MAX_VALUE, message = "amount must be less than integer max value")
+
+    @Null(message = "must be null")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer amount;
+
+    @Builder.Default
+    @Null(message = "must be null")
+    private BigDecimal price = BigDecimal.ZERO;
 }

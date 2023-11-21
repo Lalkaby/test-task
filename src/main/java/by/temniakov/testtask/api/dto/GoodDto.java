@@ -3,13 +3,12 @@ package by.temniakov.testtask.api.dto;
 import by.temniakov.testtask.enums.Currency;
 import by.temniakov.testtask.validation.annotation.NullOrNotBlank;
 import by.temniakov.testtask.validation.annotation.ValueOfEnum;
-import by.temniakov.testtask.validation.groups.UpdateInfo;
 import by.temniakov.testtask.validation.groups.CreationInfo;
 import by.temniakov.testtask.validation.groups.IdNullInfo;
+import by.temniakov.testtask.validation.groups.UpdateInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
-import jakarta.validation.groups.Default;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -31,7 +30,7 @@ public class GoodDto {
 
     @Min(value = 0, message = "amount must be not less than 0")
     @Max(value = Integer.MAX_VALUE, message = "amount must be less than integer max value")
-    private Integer amount ;
+    private Integer amount;
 
     @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
     @NullOrNotBlank(message = "must be null or not blank", groups = UpdateInfo.class)
@@ -47,5 +46,6 @@ public class GoodDto {
 
     @JsonProperty(value = "number_orders")
     @Null(message = "must be null")
-    private Integer numberOrders = 0;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer numberOrders;
 }

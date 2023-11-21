@@ -5,8 +5,8 @@ import by.temniakov.testtask.api.dto.GoodDto;
 import by.temniakov.testtask.store.entities.Good;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
-public interface GoodMapper extends BaseMapper {
+@Mapper(componentModel = "spring", uses = {BaseMapper.class})
+public interface GoodMapper{
     @Mapping(source = "id", target = "id")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "amount", target = "amount")
@@ -15,15 +15,6 @@ public interface GoodMapper extends BaseMapper {
     @Mapping(source = "currency",target = "currency")
     @Mapping(expression = "java(entity.getOrderAssoc().size())", target = "numberOrders")
     GoodDto toDto(Good entity);
-
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "title", target = "title")
-    @Mapping(source = "amount", target = "amount")
-    @Mapping(source = "producer", target = "producer")
-    @Mapping(source = "price", target = "price")
-    @Mapping(source = "currency",target = "currency")
-    @Mapping(target = "numberOrders",ignore = true)
-    GoodDto toDtoWithNoOrders(Good entity);
 
     @Mapping(source = "id", target = "id", ignore = true)
     @Mapping(source = "title", target = "title")
