@@ -20,9 +20,11 @@ import by.temniakov.testtask.validation.groups.IdNullInfo;
 import by.temniakov.testtask.validation.groups.UpdateInfo;
 import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +40,6 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderMapper orderMapper;
     private final SortOrderFactory sortOrderFactory;
-    private final AddressRepository addressRepository;
 
     public static final String GET_ORDER = "/orders/{id_order}";
     public static final String FETCH_ORDERS = "/orders";
@@ -49,7 +50,7 @@ public class OrderController {
     public static final String DELETE_ORDER_GOODS = "/orders/{id_order}/goods/{id_good}";
     public static final String CREATE_ORDER = "/orders";
 
-    public static final String UPDATE_ORDER = "/goods/{id_order}";
+    public static final String UPDATE_ORDER = "/orders/{id_order}";
     public static final String DELETE_ORDER = "/orders/{id_order}";
 
     @GetMapping(GET_ORDER)
@@ -120,17 +121,14 @@ public class OrderController {
         );
     }
 
-    // TODO: 21.11.2023  check address savings
     @PostMapping(CREATE_ORDER)
     public ResponseEntity<OrderDto> createOrder(
-            @Validated(value = {CreationInfo.class, Default.class}) OrderDto orderDto){
+            @Validated(value = {CreationInfo.class, Default.class})
+            @RequestBody OrderDto orderDto){
 
         Orders order = orderMapper.fromDto(orderDto);
 
-        if (!addressRepository.exists(Example.of(order.getAddress()))){
-            throw new NotFoundException("No such address exists.",order.getAddress().getId());
-        }
-
+        order = orderService.save(order);
         orderService.addGoods(order, orderDto.getGoodOrders());
         Orders savedOrder = orderService.saveAndFlush(order);
 
@@ -161,7 +159,7 @@ public class OrderController {
 
     // TODO: 21.11.2023  check chtoto
     @PatchMapping(value = UPDATE_ORDER)
-    public ResponseEntity<OrderDto> updateGood(
+    public ResponseEntity<OrderDto> updateOrderGood(
             @PathVariable(name = "id_order") Integer orderId,
             @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class})
             @RequestBody OrderDto orderDto){
@@ -185,15 +183,15 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    // TODO: 23.11.2023 что-то странное
     @DeleteMapping(DELETE_ORDER_GOODS)
     public ResponseEntity<OrderDto> deleteOrderGoods(
             @PathVariable(name = "id_order") Integer orderId,
             @PathVariable(name = "id_good") Integer goodId){
-        Orders order = controllerHelper.getOrderOrThrowException(orderId);
-        Good good = controllerHelper.getGoodOrThrowException(goodId);
-        orderService.deleteGood(order,good);
-        Orders savedOrder = orderService.saveAndFlush(order);
 
-        return ResponseEntity.of(Optional.of(savedOrder).map(orderMapper::toDto));
+        orderService.deleteGood(orderId,goodId);
+        Orders order = controllerHelper.getOrderOrThrowException(orderId);
+        order = (Orders) Hibernate.unproxy(order);
+        return ResponseEntity.of(Optional.of(order).map(orderMapper::toDto));
     }
 }

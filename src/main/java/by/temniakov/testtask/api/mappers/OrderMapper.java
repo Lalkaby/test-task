@@ -2,24 +2,28 @@ package by.temniakov.testtask.api.mappers;
 
 import by.temniakov.testtask.api.controllers.helpers.ControllerHelper;
 import by.temniakov.testtask.api.dto.OrderDto;
-import by.temniakov.testtask.api.mappers.factories.SortOrderFactory;
 import by.temniakov.testtask.store.entities.Orders;
-import by.temniakov.testtask.store.repositories.AddressRepository;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.mapstruct.*;
 import org.mapstruct.control.DeepClone;
 import java.math.BigDecimal;
 
-import by.temniakov.testtask.store.entities.GoodOrder;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 
 // TODO: 11.11.2023 Finish mapping
 @Mapper(componentModel = "spring",
-        uses = {GoodOrderMapper.class, AddressMapper.class, BaseMapper.class, GoodOrderMapper.class},
+        uses = {GoodOrderMapper.class, AddressMapper.class, BaseMapper.class,
+                ControllerHelper.class},
         imports =  BigDecimal.class)
-public interface OrderMapper{
+public abstract class OrderMapper{
     GoodOrderMapper goodOrderMapper = Mappers.getMapper(GoodOrderMapper.class);
+    protected ControllerHelper controllerHelper;
+    @Autowired
+    void setControllerHelper(ControllerHelper controllerHelper) {
+        this.controllerHelper = controllerHelper;
+    }
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "address",target = "address")
@@ -37,20 +41,22 @@ public interface OrderMapper{
     @Mapping(expression =
             "java(entity.getGoodAssoc().stream().map(x->x.getGood().getPrice().multiply(BigDecimal.valueOf(x.getAmount()))).reduce(BigDecimal.ZERO,BigDecimal::add))"
             ,target = "price")
-    OrderDto toDto(Orders entity);
+    @Mapping(target = "addressId",ignore = true)
+    public abstract OrderDto toDto(Orders entity);
 
     @Mapping(target = "goodAssoc",ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "orderTime", ignore = true)
     @Mapping(target = "address", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateFromDto(OrderDto addressDTO, @MappingTarget Orders entity);
+    public abstract void updateFromDto(OrderDto addressDTO, @MappingTarget Orders entity);
 
     @DeepClone
-    Orders clone(Orders entity);
+    public abstract Orders clone(Orders entity);
 
     @Mapping(target = "goodAssoc", ignore = true)
     @Mapping(target = "orderTime", ignore = true)
-    @Mapping(target = "address")
-    Orders fromDto(OrderDto orderDto);
+    @Mapping(target = "address",
+            expression = "java(controllerHelper.getAddressOrThrowException(orderDto.getAddressId()))")
+    public abstract Orders fromDto(OrderDto orderDto);
 }

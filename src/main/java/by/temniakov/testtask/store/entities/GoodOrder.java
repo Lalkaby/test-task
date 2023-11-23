@@ -13,14 +13,14 @@ import lombok.*;
 @IdClass(GoodOrderId.class)
 public class GoodOrder {
     @Id
-    @ManyToOne(targetEntity = Good.class, cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Good.class,cascade = {CascadeType.REFRESH,CascadeType.PERSIST})
     @JoinColumn(name = "id_good", referencedColumnName = "id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Good good;
 
     @Id
-    @ManyToOne(targetEntity = Orders.class,cascade = CascadeType.ALL)
+    @ManyToOne(targetEntity = Orders.class,cascade = {CascadeType.REFRESH,CascadeType.PERSIST})
     @JoinColumn(name = "id_order", referencedColumnName = "id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -29,5 +29,4 @@ public class GoodOrder {
     @Column
     @Min(value = 0, message = "Amount cannot be less then 0")
     private Integer amount;
-
 }

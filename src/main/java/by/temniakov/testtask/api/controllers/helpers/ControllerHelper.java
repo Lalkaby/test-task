@@ -10,13 +10,13 @@ import by.temniakov.testtask.store.repositories.GoodRepository;
 import by.temniakov.testtask.store.repositories.OrderRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.Mapper;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Transactional
 public class ControllerHelper {
     private final GoodRepository goodRepository;
     private final OrderService orderService;

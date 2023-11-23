@@ -2,6 +2,8 @@ package by.temniakov.testtask.store.repositories;
 
 import by.temniakov.testtask.store.entities.Orders;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;

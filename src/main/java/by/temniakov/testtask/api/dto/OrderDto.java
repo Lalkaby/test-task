@@ -9,6 +9,7 @@ import by.temniakov.testtask.validation.groups.IdNullInfo;
 import by.temniakov.testtask.validation.groups.UpdateInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -51,27 +52,31 @@ public class OrderDto {
     @JsonProperty(value = "user_email")
     private String userEmail;
 
-    @Valid
-    @NotNull(message = "must be not null", groups = CreationInfo.class)
+    @Null(message = "must be null")
     private AddressDto address;
 
+    @NotNull(message = "must be not null",groups = CreationInfo.class)
+    @JsonProperty(value = "id_address")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer addressId;
+
+    @Builder.Default
     @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
     @ValueOfEnum(enumClass = Status.class, groups = {CreationInfo.class, UpdateInfo.class, Default.class})
-    private String status;
+    private String status = "DRAFT";
 
     @Null(message = "must be null")
     private List<GoodDto> goods;
 
     @Valid
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty(value = "order_goods")
     private List<GoodOrderDto> goodOrders;
-
 
     @Null(message = "must be null")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer amount;
 
-    @Builder.Default
     @Null(message = "must be null")
-    private BigDecimal price = BigDecimal.ZERO;
+    private BigDecimal price;
 }

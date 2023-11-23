@@ -9,6 +9,8 @@ import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +33,11 @@ public class Orders {
     @Column
     private String username;
 
+    // TODO: 23.11.2023 timezone 
     @Builder.Default
     @Column(name = "order_time",
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private Instant orderTime = Instant.now();
+    private Instant orderTime = Instant.now().atZone(ZoneId.of("+03:00")).toInstant();
 
 
     @Column(name = "phone_number")
@@ -53,7 +56,7 @@ public class Orders {
     @Builder.Default
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "order",cascade = {CascadeType.REFRESH,CascadeType.PERSIST,CascadeType.REMOVE},
             targetEntity = GoodOrder.class, fetch = FetchType.LAZY)
     @BatchSize(size = 25)
     private List<GoodOrder> goodAssoc = new ArrayList<>();

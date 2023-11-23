@@ -9,12 +9,16 @@ import by.temniakov.testtask.store.entities.Orders;
 import by.temniakov.testtask.store.repositories.GoodOrderRepository;
 import by.temniakov.testtask.store.repositories.GoodRepository;
 import by.temniakov.testtask.store.repositories.OrderRepository;
+import by.temniakov.testtask.store.repositories.OrderRepositoryCustomImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
@@ -28,6 +32,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final GoodOrderRepository goodOrderRepository;
     private final GoodRepository goodRepository;
+    private final OrderRepositoryCustomImpl orderRepositoryCustom;
 
     public void delete(Orders order){
         if (order.getStatus() == Status.ACTIVE) {
@@ -51,6 +56,7 @@ public class OrderService {
         orderRepository.saveAndFlush(order);
     }
 
+    @Transactional
     public void addGoods(Orders order, @Valid List<GoodOrderDto> goodOrdersDto) {
         if (!order.getStatus().equals(Status.DRAFT)){
             throw new OrderStatusException("Can't update not the draft order.", order.getId(), order.getStatus());
@@ -71,7 +77,8 @@ public class OrderService {
                 .map(good -> new GoodOrder(good, order, goodIdWithdrawAmountMap.get(good.getId())))
                 .toList();
 
-        goodOrderRepository.saveAllAndFlush(newGoodOrders);
+//        goodOrderRepository.saveAllAndFlush(newGoodOrders);
+//        orderRepositoryCustom.refresh(order);
     }
 
     public Page<Orders> findAll(Pageable pageable) {
@@ -82,6 +89,10 @@ public class OrderService {
         return orderRepository.saveAndFlush(order);
     }
 
+    public Orders save(Orders order) {
+        return orderRepository.save(order);
+    }
+
     public Optional<Orders> findById(Integer orderId) {
         return orderRepository.findById(orderId);
     }
@@ -90,12 +101,22 @@ public class OrderService {
         return orderRepository.findAll(example,pageable);
     }
 
-    public void deleteGood(Orders order, Good good) {
-        if (!order.getStatus().equals(Status.DRAFT)){
-            throw new OrderStatusException("Can't update not the draft order.", order.getId(), order.getStatus());
+    @Transactional
+    public void deleteGood(Integer orderId, Integer goodId) {
+        GoodOrder goodOrder = goodOrderRepository
+                .findGoodOrderByOrder_IdAndGood_Id(orderId,goodId)
+                .orElseThrow(()-> new NotFoundException("No such good in the order", goodId));
+
+        goodOrder.setOrder(Hibernate.unproxy(goodOrder.getOrder(), Orders.class));
+
+        if (!goodOrder.getOrder().getStatus().equals(Status.DRAFT)){
+            throw new OrderStatusException(
+                    "Can't update not the draft order.",
+                    goodOrder.getOrder().getId(),
+                    goodOrder.getOrder().getStatus());
         }
-        boolean removed = order.getGoodAssoc().removeIf(goodOrder -> goodOrder.getGood().equals(good));
-        if (!removed) throw new NotFoundException("No such good in the order", order.getId());
+
+        goodOrderRepository.delete(goodOrder);
     }
 
 
@@ -185,7 +206,7 @@ public class OrderService {
 
         private static void updateActive(Orders order, Status newStatus) {
             switch (newStatus){
-                case DRAFT,ACTIVE -> order.setStatus(newStatus);
+                case ACTIVE,CANCELLED,COMPLETED -> order.setStatus(newStatus);
                 default -> throwIllegalStatusUpdate(order,newStatus);
             }
         }
