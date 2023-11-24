@@ -14,6 +14,7 @@ import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.entities.Orders;
 import by.temniakov.testtask.store.repositories.AddressRepository;
 import by.temniakov.testtask.store.repositories.OrderRepository;
+import by.temniakov.testtask.store.repositories.OrderRepositoryCustomImpl;
 import by.temniakov.testtask.validation.annotation.ValueOfEnum;
 import by.temniakov.testtask.validation.groups.CreationInfo;
 import by.temniakov.testtask.validation.groups.IdNullInfo;
@@ -55,7 +56,7 @@ public class OrderController {
 
     @GetMapping(GET_ORDER)
     public ResponseEntity<OrderDto> getOrderById(
-            @PathVariable(name = "id_order") Integer orderId){
+            @PathVariable(name = "id_order") Integer orderId) {
         Orders order = controllerHelper.getOrderOrThrowException(orderId);
 
         return ResponseEntity.of(Optional.of(order).map(orderMapper::toDto));
@@ -63,7 +64,7 @@ public class OrderController {
 
     @GetMapping(FETCH_ORDERS)
     public ResponseEntity<List<OrderDto>> fetchGoods(
-           @PageableDefault(page = 0, size = 50) Pageable pageable){
+           @PageableDefault(page = 0, size = 50) Pageable pageable) {
         return ResponseEntity.of(
                 Optional.of(
                         orderService
@@ -77,7 +78,7 @@ public class OrderController {
     @GetMapping(FETCH_SORTED_ORDERS)
     public ResponseEntity<List<OrderDto>> fetchSortedOrders(
             @PageableDefault(page = 0, size = 50, sort = "id",direction = Sort.Direction.ASC)
-            Pageable pageable){
+            Pageable pageable) {
         Sort newSort = Sort.by(pageable.getSort()
                 .filter(order -> sortOrderFactory.getFilterKeys().contains(order.getProperty()))
                 .map(sortOrderFactory::fromJsonSortOrder)
@@ -124,15 +125,14 @@ public class OrderController {
     @PostMapping(CREATE_ORDER)
     public ResponseEntity<OrderDto> createOrder(
             @Validated(value = {CreationInfo.class, Default.class})
-            @RequestBody OrderDto orderDto){
-
+            @RequestBody OrderDto orderDto) {
         Orders order = orderMapper.fromDto(orderDto);
 
         order = orderService.save(order);
         orderService.addGoods(order, orderDto.getGoodOrders());
-        Orders savedOrder = orderService.saveAndFlush(order);
+        orderService.refresh(order);
 
-        return ResponseEntity.of(Optional.of(savedOrder).map(orderMapper::toDto));
+        return ResponseEntity.of(Optional.of(order).map(orderMapper::toDto));
     }
 
     @PatchMapping(ADD_ORDER_GOODS)
@@ -141,16 +141,16 @@ public class OrderController {
             @RequestBody List<GoodOrderDto> goodOrdersDto){
         Orders order = controllerHelper.getOrderOrThrowException(orderId);
         orderService.addGoods(order, goodOrdersDto);
-        Orders savedOrder = orderService.saveAndFlush(order);
+        orderService.refresh(order);
 
-        return ResponseEntity.of(Optional.of(savedOrder).map(orderMapper::toDto));
+        return ResponseEntity.of(Optional.of(order).map(orderMapper::toDto));
     }
 
     @PatchMapping(CHANGE_ORDER_STATUS)
     public ResponseEntity<OrderDto> changeOrderStatus(
             @PathVariable(name = "id_order") Integer orderId,
             @ValueOfEnum(enumClass = Status.class) @RequestParam(name = "new_status")
-            String newStatus){
+            String newStatus) {
         Orders order = controllerHelper.getOrderOrThrowException(orderId);
         orderService.changeOrderStatus(order, Status.valueOf(newStatus));
 
@@ -165,33 +165,27 @@ public class OrderController {
             @RequestBody OrderDto orderDto){
         Orders order = controllerHelper.getOrderOrThrowException(orderId);
 
-        Orders cloneOrder = orderMapper.clone(order);
-        orderMapper.updateFromDto(orderDto, cloneOrder);
-        Orders savedOrder = order;
-        if (!cloneOrder.equals(order)){
-            savedOrder = orderService.saveAndFlush(cloneOrder);
-        }
+        orderMapper.updateFromDto(orderDto, order);
+        Orders savedOrder = orderService.saveAndFlush(order);
 
         return ResponseEntity.of(Optional.of(savedOrder).map(orderMapper::toDto));
     }
 
     @DeleteMapping(DELETE_ORDER)
     public ResponseEntity<OrderDto> deleteOrder(
-            @PathVariable(name="id_order") Integer orderId){
+            @PathVariable(name="id_order") Integer orderId) {
         Orders order = controllerHelper.getOrderOrThrowException(orderId);
         orderService.delete(order);
         return ResponseEntity.ok().build();
     }
 
-    // TODO: 23.11.2023 что-то странное
     @DeleteMapping(DELETE_ORDER_GOODS)
     public ResponseEntity<OrderDto> deleteOrderGoods(
             @PathVariable(name = "id_order") Integer orderId,
-            @PathVariable(name = "id_good") Integer goodId){
-
+            @PathVariable(name = "id_good") Integer goodId) {
         orderService.deleteGood(orderId,goodId);
         Orders order = controllerHelper.getOrderOrThrowException(orderId);
-        order = (Orders) Hibernate.unproxy(order);
+
         return ResponseEntity.of(Optional.of(order).map(orderMapper::toDto));
     }
 }

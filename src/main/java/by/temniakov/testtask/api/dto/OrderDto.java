@@ -60,10 +60,8 @@ public class OrderDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer addressId;
 
-    @Builder.Default
-    @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
-    @ValueOfEnum(enumClass = Status.class, groups = {CreationInfo.class, UpdateInfo.class, Default.class})
-    private String status = "DRAFT";
+    @Null(message = "must be null")
+    private String status ;
 
     @Null(message = "must be null")
     private List<GoodDto> goods;

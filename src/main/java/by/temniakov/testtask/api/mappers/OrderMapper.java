@@ -47,15 +47,19 @@ public abstract class OrderMapper{
     @Mapping(target = "goodAssoc",ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "orderTime", ignore = true)
-    @Mapping(target = "address", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "address",
+            expression = "java(controllerHelper.getAddressOrThrowException(" +
+                    "orderDto.getAddressId()==null?entity.getAddress().getId():orderDto.getAddressId()))")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    public abstract void updateFromDto(OrderDto addressDTO, @MappingTarget Orders entity);
+    public abstract void updateFromDto(OrderDto orderDto, @MappingTarget Orders entity);
 
     @DeepClone
     public abstract Orders clone(Orders entity);
 
     @Mapping(target = "goodAssoc", ignore = true)
     @Mapping(target = "orderTime", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "address",
             expression = "java(controllerHelper.getAddressOrThrowException(orderDto.getAddressId()))")
     public abstract Orders fromDto(OrderDto orderDto);

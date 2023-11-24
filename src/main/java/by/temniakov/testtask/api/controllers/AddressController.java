@@ -66,8 +66,7 @@ public class AddressController {
     @PatchMapping(UPDATE_ADDRESS)
     public ResponseEntity<AddressDto> updateAddress(
             @PathVariable(name = "id_address") Integer addressId,
-            @RequestBody @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class}) AddressDto addressDto)
-    {
+            @RequestBody @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class}) AddressDto addressDto) {
         Address address = controllerHelper.getAddressOrThrowException(addressId);
 
         Address cloneAddress = addressMapper.clone(address);
@@ -81,7 +80,6 @@ public class AddressController {
 
         return ResponseEntity.of(Optional.of(savedAddress).map(addressMapper::toDto));
     }
-
 
     @PostMapping(CREATE_ADDRESS)
     public ResponseEntity<AddressDto> createAddress(

@@ -5,6 +5,7 @@ import by.temniakov.testtask.api.exceptions.*;
 import by.temniakov.testtask.enums.Status;
 import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.entities.GoodOrder;
+import by.temniakov.testtask.store.entities.GoodOrderId;
 import by.temniakov.testtask.store.entities.Orders;
 import by.temniakov.testtask.store.repositories.GoodOrderRepository;
 import by.temniakov.testtask.store.repositories.GoodRepository;
@@ -77,8 +78,7 @@ public class OrderService {
                 .map(good -> new GoodOrder(good, order, goodIdWithdrawAmountMap.get(good.getId())))
                 .toList();
 
-//        goodOrderRepository.saveAllAndFlush(newGoodOrders);
-//        orderRepositoryCustom.refresh(order);
+        goodOrderRepository.saveAll(newGoodOrders);
     }
 
     public Page<Orders> findAll(Pageable pageable) {
@@ -103,11 +103,9 @@ public class OrderService {
 
     @Transactional
     public void deleteGood(Integer orderId, Integer goodId) {
-        GoodOrder goodOrder = goodOrderRepository
-                .findGoodOrderByOrder_IdAndGood_Id(orderId,goodId)
+        GoodOrder goodOrder =goodOrderRepository
+                .findById(new GoodOrderId(goodId,orderId))
                 .orElseThrow(()-> new NotFoundException("No such good in the order", goodId));
-
-        goodOrder.setOrder(Hibernate.unproxy(goodOrder.getOrder(), Orders.class));
 
         if (!goodOrder.getOrder().getStatus().equals(Status.DRAFT)){
             throw new OrderStatusException(
@@ -192,6 +190,10 @@ public class OrderService {
                         .stream()
                         .map(GoodOrder::getGood)
                         .toList());
+    }
+
+    public void refresh(Orders order) {
+        orderRepositoryCustom.refresh(order);
     }
 
     private static class OrderStatusChanger {

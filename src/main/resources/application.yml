@@ -1,4 +1,5 @@
 spring:
+
   jpa:
     show-sql: true
   datasource:
@@ -17,3 +18,8 @@ spring:
   mvc:
     problem-details:
       enabled: true
+logging:
+  level:
+    org.springframework:
+      orm.jpa: DEBUG
+      transaction: DEBUG

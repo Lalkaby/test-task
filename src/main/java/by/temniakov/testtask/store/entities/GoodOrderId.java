@@ -1,10 +1,13 @@
 package by.temniakov.testtask.store.entities;
 
-import lombok.Data;
+import lombok.*;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class GoodOrderId implements Serializable{
     private Integer good;
     private Integer order;
