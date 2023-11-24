@@ -150,14 +150,13 @@ public class OrderController {
     public ResponseEntity<OrderDto> changeOrderStatus(
             @PathVariable(name = "id_order") Integer orderId,
             @ValueOfEnum(enumClass = Status.class) @RequestParam(name = "new_status")
-            String newStatus) {
+            String newStatus){
         Orders order = controllerHelper.getOrderOrThrowException(orderId);
         orderService.changeOrderStatus(order, Status.valueOf(newStatus));
 
         return ResponseEntity.of(Optional.of(order).map(orderMapper::toDto));
     }
 
-    // TODO: 21.11.2023  check chtoto
     @PatchMapping(value = UPDATE_ORDER)
     public ResponseEntity<OrderDto> updateOrderGood(
             @PathVariable(name = "id_order") Integer orderId,
@@ -174,8 +173,8 @@ public class OrderController {
     @DeleteMapping(DELETE_ORDER)
     public ResponseEntity<OrderDto> deleteOrder(
             @PathVariable(name="id_order") Integer orderId) {
-        Orders order = controllerHelper.getOrderOrThrowException(orderId);
-        orderService.delete(order);
+        orderService.delete(orderId);
+
         return ResponseEntity.ok().build();
     }
 

@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 
-// TODO: 11.11.2023 Finish mapping
 @Mapper(componentModel = "spring",
         uses = {GoodOrderMapper.class, AddressMapper.class, BaseMapper.class,
                 ControllerHelper.class},

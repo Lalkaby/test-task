@@ -17,6 +17,7 @@ import org.hibernate.Hibernate;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,16 +37,26 @@ public class OrderService {
     private final GoodRepository goodRepository;
     private final OrderRepositoryCustomImpl orderRepositoryCustom;
 
-    public void delete(Orders order){
-        if (order.getStatus() == Status.ACTIVE) {
+    public void delete(Integer orderId){
+        checkExistsAndThrowException(orderId);
+
+        checkStatusForRemove(orderId);
+
+        orderRepository.deleteById(orderId);
+    }
+
+    private void checkStatusForRemove(Integer orderId) {
+        Status orderStatus = orderRepository.getStatusByOrderId(orderId);
+
+        if (orderStatus == Status.ACTIVE) {
             throw new OrderStatusException(
-                    "Can't remove an active order.", order.getId(), order.getStatus());
+                    "Can't remove an active order.", orderId, orderStatus);
         }
-        orderRepository.delete(order);
     }
 
     public void changeOrderStatus(Orders order, Status newStatus){
         OrderStatusChanger.changeStatus(order, newStatus);
+
         switch (newStatus) {
             case DRAFT, COMPLETED -> {
             }
@@ -54,6 +66,7 @@ public class OrderService {
             }
             case CANCELLED -> restoreGoods(order);
         }
+
         orderRepository.saveAndFlush(order);
     }
 
@@ -62,6 +75,7 @@ public class OrderService {
         if (!order.getStatus().equals(Status.DRAFT)){
             throw new OrderStatusException("Can't update not the draft order.", order.getId(), order.getStatus());
         }
+
         if (goodOrdersDto == null || goodOrdersDto.isEmpty()) return;
         List<Good> goods = getGoods(goodOrdersDto);
 
@@ -117,6 +131,16 @@ public class OrderService {
         goodOrderRepository.delete(goodOrder);
     }
 
+    public void refresh(Orders order) {
+        orderRepositoryCustom.refresh(order);
+    }
+
+    public void checkExistsAndThrowException(Integer orderId) {
+        if (!orderRepository.existsById(orderId)){
+            throw new NotFoundException("Order doesn't exists.", orderId);
+        }
+    }
+
 
     private void updateOrderTime(Orders order) {
         order.setOrderTime(Instant.now());
@@ -165,6 +189,7 @@ public class OrderService {
                 .map(GoodOrderDto::getGoodId)
                 .filter(Objects::nonNull)
                 .toList();
+
         List<Good> resultGoods = new ArrayList<>();
 
         if (!goodIds.isEmpty()) {
@@ -192,14 +217,9 @@ public class OrderService {
                         .toList());
     }
 
-    public void refresh(Orders order) {
-        orderRepositoryCustom.refresh(order);
-    }
-
     private static class OrderStatusChanger {
         public static void changeStatus(Orders order, Status newStatus) {
             switch (order.getStatus()){
-                case null -> order.setStatus(newStatus);
                 case DRAFT -> updateDraft(order,newStatus);
                 case ACTIVE -> updateActive(order,newStatus);
                 case CANCELLED,COMPLETED  -> updateToSameOrThrowException(order, newStatus);

@@ -6,10 +6,6 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", uses = {BaseMapper.class})
 public interface AddressMapper{
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "city",target = "city")
-    @Mapping(source = "street",target = "street")
-    @Mapping(source = "house",target = "house")
     AddressDto toDto(Address address);
 
     @Mapping(source = "id", target = "id")
