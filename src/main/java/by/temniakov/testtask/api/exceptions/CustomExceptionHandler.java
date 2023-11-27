@@ -61,9 +61,14 @@ public class CustomExceptionHandler {
                 .stream()
                 .map(ex -> {
                     String input = ex.getPropertyPath().toString();
-                    int dotIndex = input.indexOf(".");
+                    int dotIndex = input.lastIndexOf(".");
                     if (dotIndex != -1) {
-                        input = input.substring(dotIndex + 1);
+                        input = input
+                                .substring(dotIndex + 1)
+                                .replace("get", "")
+                                .replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2")
+                                .replaceAll("([a-z])([A-Z])", "$1_$2")
+                                .toLowerCase();
                     }
                     return new ParamError(input, ex.getMessage());
                 })

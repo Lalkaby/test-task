@@ -1,21 +1,11 @@
 package by.temniakov.testtask.api.controllers;
 
-import by.temniakov.testtask.api.controllers.helpers.ControllerHelper;
-import by.temniakov.testtask.api.dto.GoodDto;
-import by.temniakov.testtask.api.exceptions.InUseException;
-import by.temniakov.testtask.api.mappers.GoodMapper;
-import by.temniakov.testtask.store.entities.Good;
-import by.temniakov.testtask.store.repositories.GoodRepository;
-import by.temniakov.testtask.validation.groups.CreationInfo;
-import by.temniakov.testtask.validation.groups.IdNullInfo;
-import by.temniakov.testtask.validation.groups.UpdateInfo;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.groups.Default;
+import by.temniakov.testtask.api.dto.InGoodDto;
+import by.temniakov.testtask.api.dto.OutGoodDto;
+import by.temniakov.testtask.api.services.GoodOrderService;
+import by.temniakov.testtask.api.services.GoodService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -30,9 +20,8 @@ import java.util.Optional;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class GoodController {
-    private final GoodMapper goodMapper;
-    private final GoodRepository goodRepository;
-    private final ControllerHelper controllerHelper;
+    private final GoodService goodService;
+    private final GoodOrderService goodOrderService;
 
     public static final String GET_GOOD = "/goods/{id_good}";
     public static final String FETCH_GOODS = "/goods";
@@ -42,87 +31,48 @@ public class GoodController {
     public static final String UPDATE_GOOD = "/goods/{id_good}";
 
     @GetMapping(GET_GOOD)
-    public ResponseEntity<GoodDto> getGood(@PathVariable(name = "id_good") Integer goodId){
-        Good good = controllerHelper.getGoodOrThrowException(goodId);
-        return ResponseEntity.of(Optional.of(good).map(goodMapper::toDto));
+    public ResponseEntity<OutGoodDto> getGood(@PathVariable(name = "id_good") Integer goodId){
+        return ResponseEntity.of(Optional.of(goodService.getDtoByIdOrThrowException(goodId)));
     }
 
     @GetMapping(FETCH_GOODS)
-    public ResponseEntity<List<GoodDto>> fetchGoods(
-            @RequestParam(name = "page", defaultValue = "0")
-            @Min(value = 0, message = "must be not less than 0") Integer page,
-            @RequestParam(name = "size", defaultValue = "50")
-            @Min(value = 1,message = "must be not less than 1") Integer size){
-        return ResponseEntity.of(
-                Optional.of(
-                        goodRepository
-                                .findAll(PageRequest.of(page,size))
-                                .map(goodMapper::toDto)
-                                .toList()
-                )
-        );
+    public ResponseEntity<List<OutGoodDto>> fetchGoods(
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "50") Integer size){
+        return ResponseEntity.of(Optional.of(goodService.findDtoByPage(page,size)));
     }
 
     @GetMapping(FETCH_SORTED_GOODS)
-    public ResponseEntity<List<GoodDto>> fetchSortedGoods(
-            @Pattern(regexp = "price|amount", message = "must be one of {regexp}")
-            @RequestParam(name = "field") String field,
-            @RequestParam(name = "order", defaultValue = "asc") String order,
-            @Min(value = 0, message = "must be not less than 0")
-            @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @Min(value = 1,message = "must be not less than 1")
-            @RequestParam(name = "size", defaultValue = "50")Integer size){
-        Sort.Direction direction = Sort.Direction.fromOptionalString(order).orElse(Sort.Direction.ASC);
-        PageRequest pageRequest = PageRequest.of(page,size, direction,field);
+    public ResponseEntity<List<OutGoodDto>> fetchSortedGoods(Pageable pageable){
 
         return ResponseEntity.of(
-                Optional.of(
-                        goodRepository
-                                .findAll(pageRequest)
-                                .map(goodMapper::toDto)
-                                .toList()
-                )
+                Optional.of(goodService.findSortedDtoByPageable(pageable))
         );
     }
 
     @PostMapping(CREATE_GOOD)
-    public ResponseEntity<GoodDto> createGood(
-            @RequestBody @Validated(value = {CreationInfo.class, Default.class}) GoodDto createGoodDto){
-        Good good = goodMapper.fromDto(createGoodDto);
-        Good savedGood = goodRepository
-                .findOne(Example.of(good))
-                .orElseGet(()->goodRepository.saveAndFlush(good));
+    public ResponseEntity<OutGoodDto> createGood(
+            @RequestBody InGoodDto createGoodDto){
+        OutGoodDto createdGoodDto = goodService
+                .getDtoFromAddress(goodService.createGood(createGoodDto));
 
-        return ResponseEntity.of(Optional.of(savedGood).map(goodMapper::toDto));
+        return ResponseEntity.of(Optional.of(createdGoodDto));
     }
 
     @PatchMapping(value = UPDATE_GOOD)
-    public ResponseEntity<GoodDto> updateGood(
+    public ResponseEntity<OutGoodDto> updateGood(
             @PathVariable(name = "id_good") Integer goodId,
-            @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class}) @RequestBody GoodDto goodDTO){
-        Good good = controllerHelper.getGoodOrThrowException(goodId);
+            @RequestBody InGoodDto goodDto){
+        OutGoodDto updatedGoodDto = goodService
+                .getDtoFromAddress(goodService.getUpdatedOrExistingGood(goodId, goodDto));
 
-        Good cloneGood = goodMapper.clone(good);
-        goodMapper.updateFromDto(goodDTO,cloneGood);
-        Good savedGood = cloneGood;
-        if (!cloneGood.equals(good)){
-           savedGood =  goodRepository
-                   .findOne(Example.of(cloneGood, controllerHelper.getExampleMatcherWithIgnoreIdPath()))
-                   .orElseGet(()->goodRepository.saveAndFlush(cloneGood));
-        }
-
-        return ResponseEntity.of(Optional.of(savedGood).map(goodMapper::toDto));
+        return ResponseEntity.of(
+                Optional.of(updatedGoodDto));
     }
 
     @DeleteMapping(DELETE_GOOD)
-    public ResponseEntity<GoodDto> deleteGood(@PathVariable(name = "id_good") Integer goodId){
-        Good good = controllerHelper.getGoodOrThrowException(goodId);
-
-        if (!good.getOrderAssoc().isEmpty()){
-            throw new InUseException("Good is still in use",goodId);
-        }
-
-        goodRepository.delete(good);
+    public ResponseEntity<OutGoodDto> deleteGood(@PathVariable(name = "id_good") Integer goodId){
+        goodService.delete(goodId);
 
         return ResponseEntity.ok().build();
     }

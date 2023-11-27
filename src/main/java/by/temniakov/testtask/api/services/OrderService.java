@@ -1,41 +1,41 @@
 package by.temniakov.testtask.api.services;
 
-import by.temniakov.testtask.api.dto.GoodOrderDto;
+import by.temniakov.testtask.api.dto.InOrderDto;
+import by.temniakov.testtask.api.dto.OutOrderDto;
 import by.temniakov.testtask.api.exceptions.*;
+import by.temniakov.testtask.api.mappers.OrderMapper;
+import by.temniakov.testtask.api.mappers.factories.SortOrderFactory;
 import by.temniakov.testtask.enums.Status;
 import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.entities.GoodOrder;
-import by.temniakov.testtask.store.entities.GoodOrderId;
 import by.temniakov.testtask.store.entities.Orders;
-import by.temniakov.testtask.store.repositories.GoodOrderRepository;
-import by.temniakov.testtask.store.repositories.GoodRepository;
 import by.temniakov.testtask.store.repositories.OrderRepository;
 import by.temniakov.testtask.store.repositories.OrderRepositoryCustomImpl;
+import by.temniakov.testtask.validation.annotation.ValueOfEnum;
+import by.temniakov.testtask.validation.groups.CreationInfo;
+import by.temniakov.testtask.validation.groups.IdNullInfo;
+import by.temniakov.testtask.validation.groups.UpdateInfo;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.data.domain.*;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Validated
+@RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final GoodOrderRepository goodOrderRepository;
-    private final GoodRepository goodRepository;
     private final OrderRepositoryCustomImpl orderRepositoryCustom;
+    private final SortOrderFactory sortOrderFactory;
+    private final OrderMapper orderMapper;
+    private final GoodService goodService;
 
     public void delete(Integer orderId){
         checkExistsAndThrowException(orderId);
@@ -46,7 +46,7 @@ public class OrderService {
     }
 
     private void checkStatusForRemove(Integer orderId) {
-        Status orderStatus = orderRepository.getStatusByOrderId(orderId);
+        Status orderStatus = getOrderStatusById(orderId);
 
         if (orderStatus == Status.ACTIVE) {
             throw new OrderStatusException(
@@ -54,10 +54,17 @@ public class OrderService {
         }
     }
 
-    public void changeOrderStatus(Orders order, Status newStatus){
-        OrderStatusChanger.changeStatus(order, newStatus);
+    public Status getOrderStatusById(Integer orderId) {
+        return orderRepository.getOrderStatusById(orderId);
+    }
 
-        switch (newStatus) {
+    public Orders changeOrderStatus(
+            Integer orderId, @ValueOfEnum(enumClass = Status.class)String newStatus){
+        Status status = Status.valueOf(newStatus);
+        Orders order = getByIdOrThrowException(orderId);
+        OrderStatusChanger.changeStatus(order, status);
+
+        switch (status) {
             case DRAFT, COMPLETED -> {
             }
             case ACTIVE -> {
@@ -67,101 +74,55 @@ public class OrderService {
             case CANCELLED -> restoreGoods(order);
         }
 
-        orderRepository.saveAndFlush(order);
-    }
-
-    @Transactional
-    public void addGoods(Orders order, @Valid List<GoodOrderDto> goodOrdersDto) {
-        if (!order.getStatus().equals(Status.DRAFT)){
-            throw new OrderStatusException("Can't update not the draft order.", order.getId(), order.getStatus());
-        }
-
-        if (goodOrdersDto == null || goodOrdersDto.isEmpty()) return;
-        List<Good> goods = getGoods(goodOrdersDto);
-
-        List<Integer> goodIds = goods.stream().map(Good::getId).toList();
-
-        Map<Integer,Integer> goodIdWithdrawAmountMap = goodOrdersDto
-                .stream()
-                .filter(Objects::nonNull)
-                .filter(goodOrderDto -> goodIds.contains(goodOrderDto.getGoodId()))
-                .collect(Collectors.toMap(GoodOrderDto::getGoodId, GoodOrderDto::getAmount));
-
-        List<GoodOrder> newGoodOrders = goods
-                .stream()
-                .map(good -> new GoodOrder(good, order, goodIdWithdrawAmountMap.get(good.getId())))
-                .toList();
-
-        goodOrderRepository.saveAll(newGoodOrders);
-    }
-
-    public Page<Orders> findAll(Pageable pageable) {
-        return orderRepository.findAll(pageable);
-    }
-
-    public Orders saveAndFlush(Orders order) {
         return orderRepository.saveAndFlush(order);
     }
 
-    public Orders save(Orders order) {
+
+    public Page<Orders> findAll(Pageable pageable){
+        return orderRepository.findAll(pageable);
+    }
+
+    public Page<Orders> findAll(Example<Orders> example,Pageable pageable) {
+        return orderRepository.findAll(example, pageable);
+    }
+
+    public Orders saveAndFlush(Orders order){return orderRepository.saveAndFlush(order);
+    }
+
+    public Orders save(Orders order){
         return orderRepository.save(order);
     }
 
-    public Optional<Orders> findById(Integer orderId) {
-        return orderRepository.findById(orderId);
-    }
-
-    public Page<Orders> findAll(Example<Orders> example, Pageable pageable){
-        return orderRepository.findAll(example,pageable);
-    }
-
-    @Transactional
-    public void deleteGood(Integer orderId, Integer goodId) {
-        GoodOrder goodOrder =goodOrderRepository
-                .findById(new GoodOrderId(goodId,orderId))
-                .orElseThrow(()-> new NotFoundException("No such good in the order", goodId));
-
-        if (!goodOrder.getOrder().getStatus().equals(Status.DRAFT)){
-            throw new OrderStatusException(
-                    "Can't update not the draft order.",
-                    goodOrder.getOrder().getId(),
-                    goodOrder.getOrder().getStatus());
-        }
-
-        goodOrderRepository.delete(goodOrder);
-    }
-
-    public void refresh(Orders order) {
+    public void refresh(Orders order){
         orderRepositoryCustom.refresh(order);
     }
 
-    public void checkExistsAndThrowException(Integer orderId) {
+    public void checkExistsAndThrowException(Integer orderId){
         if (!orderRepository.existsById(orderId)){
             throw new NotFoundException("Order doesn't exists.", orderId);
         }
     }
 
 
-    private void updateOrderTime(Orders order) {
+    private void updateOrderTime(Orders order){
         order.setOrderTime(Instant.now());
     }
 
-    private void withdrawGoods(Orders order) {
+    private void withdrawGoods(Orders order){
         for (var goodAssoc : order.getGoodAssoc()){
             Good good = goodAssoc.getGood();
             Integer withdrawAmount = goodAssoc.getAmount();
             goodAssoc.getGood().setAmount(good.getAmount() - withdrawAmount);
         }
 
-        goodRepository.saveAllAndFlush(
+        goodService.saveAllAndFlush(
                 order.getGoodAssoc()
                         .stream()
                         .map(GoodOrder::getGood)
                         .toList());
     }
 
-
-    private void tryWithdrawGoods(Orders order) {
+    private void tryWithdrawGoods(Orders order){
         List<GoodOrder> notValidAmounts = order.getGoodAssoc()
                 .stream()
                 .filter(goodOrder ->
@@ -182,43 +143,94 @@ public class OrderService {
         withdrawGoods(order);
     }
 
-    private List<Good> getGoods(List<GoodOrderDto> goodOrdersDto) {
-        List<Integer> goodIds =  goodOrdersDto
-                .stream()
-                .filter(Objects::nonNull)
-                .map(GoodOrderDto::getGoodId)
-                .filter(Objects::nonNull)
-                .toList();
-
-        List<Good> resultGoods = new ArrayList<>();
-
-        if (!goodIds.isEmpty()) {
-            resultGoods = goodRepository.findAllById(goodIds);
-        }
-
-        if (resultGoods.isEmpty()) {
-            throw new NotFoundException("No goods were found.",goodIds);
-        }
-
-        return resultGoods;
-    }
-
-    private void restoreGoods(Orders order) {
+    private void restoreGoods(Orders order){
         for (var goodAssoc : order.getGoodAssoc()){
             Good good = goodAssoc.getGood();
             Integer restoredAmount = goodAssoc.getAmount();
             goodAssoc.getGood().setAmount(good.getAmount() + restoredAmount);
         }
 
-        goodRepository.saveAllAndFlush(
+        goodService.saveAllAndFlush(
                 order.getGoodAssoc()
                         .stream()
                         .map(GoodOrder::getGood)
                         .toList());
     }
 
-    private static class OrderStatusChanger {
-        public static void changeStatus(Orders order, Status newStatus) {
+    public List<OutOrderDto> findFilteredAndSortedDtoByPageable(
+            String phoneNumber, @PageableDefault(page = 0, size = 50) Pageable pageable){
+        Sort newSort = Sort.by(pageable.getSort()
+                .filter(order -> sortOrderFactory.getFilterKeys().contains(order.getProperty()))
+                .map(sortOrderFactory::fromJsonSortOrder)
+                .toList());
+
+        PageRequest newPage = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
+        Page<Orders> resultPage;
+        if (!phoneNumber.isEmpty()){
+            Example<Orders> filterExample = getFilterExample(phoneNumber);
+            resultPage = findAll(filterExample,newPage);
+        }
+        else{
+            resultPage = findAll(newPage);
+        }
+
+
+        return resultPage
+                .map(orderMapper::toOutDto)
+                .toList();
+    }
+
+    @Nonnull
+    private static Example<Orders> getFilterExample(String phoneNumber){
+        Orders filterOrder = Orders.builder()
+                .phoneNumber(phoneNumber.trim())
+                .orderTime(null)
+                .status(null)
+                .build();
+
+        return Example.of(
+                filterOrder,
+                ExampleMatcher
+                        .matching()
+                        .withStringMatcher(
+                                ExampleMatcher.StringMatcher.CONTAINING));
+    }
+
+    public OutOrderDto getDtoByIdOrThrowException(Integer orderId){
+        return orderMapper
+                .toOutDto(getByIdOrThrowException(orderId));
+    }
+
+    public Orders getByIdOrThrowException(Integer orderId){
+        return orderRepository
+                .findById(orderId)
+                .orElseThrow(()->
+                        new NotFoundException("Order doesn't exists.", orderId)
+                );
+    }
+
+    @Validated(value = {UpdateInfo.class,Default.class})
+    public Orders getUpdatedOrder(
+            Integer orderId,@Valid InOrderDto orderDto){
+        Orders order = getByIdOrThrowException(orderId);
+        orderMapper.updateFromDto(orderDto, order);
+
+        return saveAndFlush(order);
+    }
+
+    public OutOrderDto getDtoFromOrder(Orders order){
+        return orderMapper.toOutDto(order);
+    }
+
+    @Validated(value = {CreationInfo.class, Default.class})
+    public Orders createOrder(
+            @Valid InOrderDto createOrderDto){
+        Orders order = orderMapper.fromDto(createOrderDto);
+        return saveAndFlush(order);
+    }
+
+    private static class OrderStatusChanger{
+        public static void changeStatus(Orders order, Status newStatus){
             switch (order.getStatus()){
                 case DRAFT -> updateDraft(order,newStatus);
                 case ACTIVE -> updateActive(order,newStatus);
@@ -226,7 +238,7 @@ public class OrderService {
             }
         }
 
-        private static void updateActive(Orders order, Status newStatus) {
+        private static void updateActive(Orders order, Status newStatus){
             switch (newStatus){
                 case ACTIVE,CANCELLED,COMPLETED -> order.setStatus(newStatus);
                 default -> throwIllegalStatusUpdate(order,newStatus);

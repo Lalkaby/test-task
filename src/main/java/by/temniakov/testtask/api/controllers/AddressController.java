@@ -1,23 +1,10 @@
 package by.temniakov.testtask.api.controllers;
 
-import by.temniakov.testtask.api.controllers.helpers.ControllerHelper;
-import by.temniakov.testtask.api.dto.AddressDto;
-import by.temniakov.testtask.api.exceptions.InUseException;
-import by.temniakov.testtask.api.mappers.AddressMapper;
+import by.temniakov.testtask.api.dto.InAddressDto;
+import by.temniakov.testtask.api.dto.OutAddressDto;
 import by.temniakov.testtask.api.services.AddressService;
-import by.temniakov.testtask.store.entities.Address;
-import by.temniakov.testtask.store.repositories.AddressRepository;
-import by.temniakov.testtask.validation.groups.UpdateInfo;
-import by.temniakov.testtask.validation.groups.CreationInfo;
-import by.temniakov.testtask.validation.groups.IdNullInfo;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,13 +26,13 @@ public class AddressController {
 
 
     @GetMapping(GET_ADDRESS)
-    public ResponseEntity<AddressDto> getAddress(
+    public ResponseEntity<OutAddressDto> getAddress(
             @PathVariable(name = "id_address") Integer addressId){
         return ResponseEntity.of(Optional.of(addressService.getDtoByIdOrThrowException(addressId)));
     }
 
     @GetMapping(FETCH_ADDRESSES)
-    public ResponseEntity<List<AddressDto>> fetchAddresses(
+    public ResponseEntity<List<OutAddressDto>> fetchAddresses(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "50") Integer size){
         return ResponseEntity.of(
@@ -53,27 +40,27 @@ public class AddressController {
     }
 
     @PatchMapping(UPDATE_ADDRESS)
-    public ResponseEntity<AddressDto> updateAddress(
+    public ResponseEntity<OutAddressDto> updateAddress(
             @PathVariable(name = "id_address") Integer addressId,
-            @RequestBody  AddressDto addressDto) {
+            @RequestBody InAddressDto addressDto) {
 
-        AddressDto updatedAddressDto = addressService
-                .getDtoFromAddress(addressService.getUpdatedAddress(addressId, addressDto));
+        OutAddressDto updatedAddressDto = addressService
+                .getDtoFromAddress(addressService.getUpdatedOrExistingAddress(addressId, addressDto));
 
         return ResponseEntity.of(
                 Optional.of(updatedAddressDto));
     }
 
     @PostMapping(CREATE_ADDRESS)
-    public ResponseEntity<AddressDto> createAddress(
-            @RequestBody AddressDto createAddressDto){
-        AddressDto createdAddressDto = addressService
+    public ResponseEntity<OutAddressDto> createAddress(
+            @RequestBody InAddressDto createAddressDto){
+        OutAddressDto createdAddressDto = addressService
                 .getDtoFromAddress(addressService.createAddress(createAddressDto));
         return ResponseEntity.of(Optional.of(createdAddressDto));
     }
 
     @DeleteMapping(DELETE_ADDRESS)
-    public ResponseEntity<AddressDto> deleteAddress(
+    public ResponseEntity<OutAddressDto> deleteAddress(
             @PathVariable(name = "id_address") Integer addressId){
         addressService.delete(addressId);
 

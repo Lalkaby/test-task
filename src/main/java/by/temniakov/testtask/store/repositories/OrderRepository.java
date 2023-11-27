@@ -22,5 +22,5 @@ public interface OrderRepository
     Stream<Orders> findAllByPhoneNumberContaining(String filterString, Pageable pageable);
 
     @Query(nativeQuery = true,value = "select status from orders where orders.id=:orderId")
-    Status getStatusByOrderId(Integer orderId);
+    Status getOrderStatusById(Integer orderId);
 }

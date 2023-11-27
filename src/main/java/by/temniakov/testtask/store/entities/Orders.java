@@ -9,8 +9,6 @@ import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +40,7 @@ public class Orders {
     private String phoneNumber;
 
     @NullOrNotBlank
-    @Pattern(message = "Email is not valid",
+    @Pattern(message = "email is not valid",
             regexp = RegexpConstants.EMAIL)
     @Column(name = "user_email")
     private String userEmail;

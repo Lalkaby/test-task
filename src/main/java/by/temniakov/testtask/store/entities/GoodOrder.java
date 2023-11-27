@@ -5,7 +5,8 @@ import jakarta.validation.constraints.Min;
 import lombok.*;
 
 
-@Data
+@Getter
+@Setter
 @Builder
 @Entity
 @NoArgsConstructor
