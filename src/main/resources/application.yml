@@ -17,6 +17,8 @@ spring:
   mvc:
     problem-details:
       enabled: true
+    pathmatch:
+      matching-strategy: ant_path_matcher
   main:
     allow-circular-references: true
 logging:
@@ -24,3 +26,13 @@ logging:
     org.springframework:
       orm.jpa: DEBUG
       transaction: DEBUG
+springfox:
+  documentation:
+    swagger-ui:
+      base-url: /myproject
+      enabled: true
+    swagger:
+      v2:
+        enabled: true
+        use-model-v3: true
+    auto-startup: true

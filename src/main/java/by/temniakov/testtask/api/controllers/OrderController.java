@@ -7,8 +7,13 @@ import by.temniakov.testtask.api.services.GoodOrderService;
 import by.temniakov.testtask.api.services.OrderService;
 import by.temniakov.testtask.enums.Status;
 import by.temniakov.testtask.store.entities.Orders;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +24,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Tag(name="order", description = "Order management APIs")
 public class OrderController {
     private final OrderService orderService;
     private final GoodOrderService goodOrderService;
@@ -33,6 +39,10 @@ public class OrderController {
     public static final String DELETE_ORDER = "/orders/{id_order}";
 
     @GetMapping(GET_ORDER)
+    @Operation(tags = {"get"})
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "404", description = "Order not found.")
+    })
     public ResponseEntity<OutOrderDto> getOrderById(
             @PathVariable(name = "id_order") Integer orderId) {
 
@@ -40,6 +50,7 @@ public class OrderController {
     }
 
     @GetMapping(FETCH_ORDERS)
+    @Operation(tags = {"get"})
     public ResponseEntity<List<OutOrderDto>> fetchFilteredSortedOrders(
             @RequestParam(name = "phone_number",defaultValue = "",required = false) String phoneNumber,
             Pageable pageable) {
@@ -50,6 +61,7 @@ public class OrderController {
     }
 
     @PostMapping(CREATE_ORDER)
+    @Operation(tags = {"post"})
     public ResponseEntity<OutOrderDto> createOrder(
             @RequestBody InOrderDto createOrderDto) {
         Orders order = orderService.createOrder(createOrderDto);
@@ -61,6 +73,7 @@ public class OrderController {
     }
 
     @PatchMapping(ADD_ORDER_GOODS)
+    @Operation(tags = {"patch"})
     public ResponseEntity<OutOrderDto> addOrderGoods(
             @PathVariable(name = "id_order") Integer orderId,
             @RequestBody List<InGoodOrderDto> goodOrdersDto){
@@ -71,6 +84,7 @@ public class OrderController {
     }
 
     @PatchMapping(CHANGE_ORDER_STATUS)
+    @Operation(tags = {"patch"})
     public ResponseEntity<OutOrderDto> changeOrderStatus(
             @PathVariable(name = "id_order") Integer orderId,
             @RequestParam(name = "new_status") String newStatus){
@@ -80,6 +94,7 @@ public class OrderController {
     }
 
     @PatchMapping(value = UPDATE_ORDER)
+    @Operation(tags = {"patch"})
     public ResponseEntity<OutOrderDto> updateOrderGood(
             @PathVariable(name = "id_order") Integer orderId,
             @RequestBody InOrderDto orderDto){
@@ -91,6 +106,7 @@ public class OrderController {
     }
 
     @DeleteMapping(DELETE_ORDER)
+    @Operation(tags = {"delete"})
     public ResponseEntity<InOrderDto> deleteOrder(
             @PathVariable(name="id_order") Integer orderId) {
         orderService.delete(orderId);
@@ -99,6 +115,7 @@ public class OrderController {
     }
 
     @DeleteMapping(DELETE_ORDER_GOODS)
+    @Operation(tags = {"delete"})
     public ResponseEntity<OutOrderDto> deleteOrderGoods(
             @PathVariable(name = "id_order") Integer orderId,
             @PathVariable(name = "id_good") Integer goodId) {

@@ -3,6 +3,8 @@ package by.temniakov.testtask.api.controllers;
 import by.temniakov.testtask.api.dto.InAddressDto;
 import by.temniakov.testtask.api.dto.OutAddressDto;
 import by.temniakov.testtask.api.services.AddressService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -11,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@Validated
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Tag(name="address", description = "Address management APIs")
 public class AddressController {
     private final AddressService addressService;
 
@@ -26,12 +28,14 @@ public class AddressController {
 
 
     @GetMapping(GET_ADDRESS)
+    @Operation(tags = {"get"})
     public ResponseEntity<OutAddressDto> getAddress(
             @PathVariable(name = "id_address") Integer addressId){
         return ResponseEntity.of(Optional.of(addressService.getDtoByIdOrThrowException(addressId)));
     }
 
     @GetMapping(FETCH_ADDRESSES)
+    @Operation(tags = {"get"})
     public ResponseEntity<List<OutAddressDto>> fetchAddresses(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "50") Integer size){
@@ -40,6 +44,8 @@ public class AddressController {
     }
 
     @PatchMapping(UPDATE_ADDRESS)
+    @Operation(tags = {"patch"})
+
     public ResponseEntity<OutAddressDto> updateAddress(
             @PathVariable(name = "id_address") Integer addressId,
             @RequestBody InAddressDto addressDto) {
@@ -52,6 +58,7 @@ public class AddressController {
     }
 
     @PostMapping(CREATE_ADDRESS)
+    @Operation(tags = {"post"})
     public ResponseEntity<OutAddressDto> createAddress(
             @RequestBody InAddressDto createAddressDto){
         OutAddressDto createdAddressDto = addressService
@@ -60,6 +67,7 @@ public class AddressController {
     }
 
     @DeleteMapping(DELETE_ADDRESS)
+    @Operation(tags = {"delete"})
     public ResponseEntity<OutAddressDto> deleteAddress(
             @PathVariable(name = "id_address") Integer addressId){
         addressService.delete(addressId);

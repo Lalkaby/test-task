@@ -34,7 +34,7 @@ public class InOrderDto {
 
     @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
     @NullOrNotBlank( groups = UpdateInfo.class)
-    //@Email(regexp = RegexpConstants.EMAIL, message = "email must be valid")
+    @Email(regexp = RegexpConstants.EMAIL, message = "email must be valid")
     @JsonProperty(value = "user_email")
     private String userEmail;
 

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>by.temniakov</groupId>
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.1.5</version>
+            <version>3.2.0</version>
         </dependency>
         <!--> Lombok <-->
         <dependency>
@@ -31,11 +31,12 @@
             <scope>provided</scope>
         </dependency>
         <!--> Lombok <-->
+
         <!--> Database <-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>3.1.5</version>
+            <version>3.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -48,12 +49,14 @@
             <version>1.1.0.RELEASE</version>
         </dependency>
         <!--> Database <-->
+
         <!--> Validation <-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <!--> Validation <-->
+
         <!--> Mapper <-->
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -67,6 +70,13 @@
         </dependency>
         <!--> Mapper <-->
 
+        <!--> Swagger <-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <!--> Swagger <-->
 
         <!--> FlyWay <-->
         <dependency>
@@ -75,7 +85,6 @@
             <version>9.22.3</version>
         </dependency>
         <!--> FlyWay <-->
-
 
         <!--> Tests <-->
         <dependency>

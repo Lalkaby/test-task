@@ -21,9 +21,6 @@ public interface GoodRepository
     @Query(value = "SELECT g FROM Good g LEFT JOIN FETCH g.orderAssoc")
     Page<Good> findAllWithOrders(Pageable pageable);
 
-//    @Query(nativeQuery = true,
-//            value = "select v.id from ([:goodIds]) as v(id) where not exists(select id from good)")
-//    List<Integer> getNotExistingIds(List<Integer> goodIds);
     @Query(nativeQuery = true,
             value = "select good.id from good where (good.id in :goodIds)")
     List<Integer> getExistingIds(List<Integer> goodIds);

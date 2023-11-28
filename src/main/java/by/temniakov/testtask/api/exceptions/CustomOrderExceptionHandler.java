@@ -4,13 +4,13 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
 
 @RestControllerAdvice
 public class CustomOrderExceptionHandler {
-    @Order(1)
     @ExceptionHandler(UpdateOrderStatusException.class)
     public ProblemDetail orderStatusHandler(UpdateOrderStatusException exception){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -23,7 +23,6 @@ public class CustomOrderExceptionHandler {
         return problemDetail;
     }
 
-    @Order(1)
     @ExceptionHandler(EmptyOrderException.class)
     public ProblemDetail emptyOrderHandler(EmptyOrderException exception){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -34,7 +33,6 @@ public class CustomOrderExceptionHandler {
         return problemDetail;
     }
 
-    @Order(1)
     @ExceptionHandler(InvalidOrderAmountException.class)
     public ProblemDetail invalidOrderAmountHandler(InvalidOrderAmountException exception){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -47,7 +45,6 @@ public class CustomOrderExceptionHandler {
         return problemDetail;
     }
 
-    @Order
     @ExceptionHandler(OrderStatusException.class)
     public ProblemDetail orderStatusHandler(OrderStatusException exception){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);

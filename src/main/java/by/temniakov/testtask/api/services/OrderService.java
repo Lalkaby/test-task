@@ -158,7 +158,7 @@ public class OrderService {
     }
 
     public List<OutOrderDto> findFilteredAndSortedDtoByPageable(
-            String phoneNumber, @PageableDefault(page = 0, size = 50) Pageable pageable){
+            String phoneNumber, Pageable pageable){
         Sort newSort = Sort.by(pageable.getSort()
                 .filter(order -> sortOrderFactory.getFilterKeys().contains(order.getProperty()))
                 .map(sortOrderFactory::fromJsonSortOrder)

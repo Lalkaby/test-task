@@ -8,6 +8,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
@@ -17,7 +18,6 @@ import java.util.List;
 @Log4j2
 @RestControllerAdvice
 public class CustomExceptionHandler {
-
     @ExceptionHandler(NotFoundException.class)
     public ProblemDetail notFoundHandler(NotFoundException exception){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
@@ -77,15 +77,6 @@ public class CustomExceptionHandler {
         return problemDetail;
     }
 
-
-//    @Order()
-//    @ExceptionHandler(Exception.class)
-//    public ProblemDetail anyExceptionHandler(Exception ex){
-//        ProblemDetail problemDetail = ProblemDetail.forStatus(200);
-//        problemDetail.setDetail(ex.getClass().toString() + ex.getMessage() + Arrays.toString(ex.getStackTrace()));
-//        System.err.println(Arrays.toString(ex.getStackTrace()));
-//        return problemDetail;
-//    }
 
     record FieldError(String field, String message){}
     record ParamError(String param, String message){}
