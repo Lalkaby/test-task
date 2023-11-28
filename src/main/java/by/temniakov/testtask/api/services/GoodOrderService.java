@@ -10,7 +10,8 @@ import by.temniakov.testtask.store.entities.GoodOrderId;
 import by.temniakov.testtask.store.entities.Orders;
 import by.temniakov.testtask.store.repositories.GoodOrderRepository;
 import jakarta.validation.Valid;
-import lombok.Builder;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,9 +49,8 @@ public class GoodOrderService {
         goodOrderRepository.deleteById(goodOrderId);
     }
 
-    // TODO: 27.11.2023 Validation dont work
     @Transactional
-    @Validated(value = Builder.Default.class)
+    @Validated(value = Default.class)
     public void addGoods(Orders order, List<@Valid InGoodOrderDto> goodOrdersDto){
         Status status = order.getStatus();
         if (!status.equals(Status.DRAFT)){
@@ -58,7 +58,7 @@ public class GoodOrderService {
         }
 
         if (goodOrdersDto == null || goodOrdersDto.isEmpty()) return;
-        List<Good> goods = getGoods(goodOrdersDto);
+        List<Good> goods = tryGetGoods(goodOrdersDto);
 
         List<Integer> goodIds = goods.stream().map(Good::getId).toList();
 
@@ -66,7 +66,7 @@ public class GoodOrderService {
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(goodOrderDto -> goodIds.contains(goodOrderDto.getGoodId()))
-                .collect(Collectors.toMap(InGoodOrderDto::getGoodId, InGoodOrderDto::getAmount));
+                .collect(Collectors.toMap(InGoodOrderDto::getGoodId, InGoodOrderDto::getAmount,Integer::sum));
 
         List<GoodOrder> newGoodOrders = goods
                 .stream()
@@ -76,9 +76,26 @@ public class GoodOrderService {
         saveAll(newGoodOrders);
     }
 
-    // TODO: 27.11.2023 Validation dont work
+    private List<Good> tryGetGoods(List<InGoodOrderDto> goodOrdersDto) {
+        List<Integer> goodIds = new ArrayList<>(goodOrdersDto
+                .stream()
+                .filter(Objects::nonNull)
+                .map(InGoodOrderDto::getGoodId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList());
+
+        List<Integer> existingIds = goodService.getExistingIds(goodIds);
+        if (existingIds.size()!=goodIds.size()){
+            goodIds.removeAll(existingIds);
+            throw new NotFoundException("No such goods", goodIds);
+        }
+
+        return getGoods(goodIds);
+    }
+
     @Transactional
-    @Validated(value = Builder.Default.class)
+    @Validated(value = Default.class)
     public void addGoods(Integer orderId, List<@Valid InGoodOrderDto> goodOrdersDto){
         Orders order = orderService.getByIdOrThrowException(orderId);
         addGoods(order, goodOrdersDto);
@@ -92,20 +109,8 @@ public class GoodOrderService {
         deleteById(goodOrderId);
     }
 
-
-    private List<Good> getGoods(List<InGoodOrderDto> goodOrdersDto){
-        List<Integer> goodIds =  goodOrdersDto
-                .stream()
-                .filter(Objects::nonNull)
-                .map(InGoodOrderDto::getGoodId)
-                .filter(Objects::nonNull)
-                .toList();
-
-        List<Good> resultGoods = new ArrayList<>();
-
-        if (!goodIds.isEmpty()) {
-            resultGoods = goodService.findAllById(goodIds);
-        }
+    private List<Good> getGoods(List<Integer> goodIds){
+        List<Good> resultGoods = goodService.findAllById(goodIds);
 
         if (resultGoods.isEmpty()) {
             throw new NotFoundException("No goods were found.",goodIds);

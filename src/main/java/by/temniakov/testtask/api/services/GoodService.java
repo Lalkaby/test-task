@@ -134,4 +134,8 @@ public class GoodService {
     public List<Good> findAllById(Iterable<Integer> entities){
         return goodRepository.findAllById(entities);
     }
+
+    public List<Integer> getExistingIds(List<Integer> goodIds) {
+        return goodRepository.getExistingIds(goodIds);
+    }
 }
