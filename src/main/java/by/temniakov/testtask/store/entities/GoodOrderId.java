@@ -8,6 +8,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
+@EqualsAndHashCode
 public class GoodOrderId implements Serializable{
     private Integer good;
     private Integer order;

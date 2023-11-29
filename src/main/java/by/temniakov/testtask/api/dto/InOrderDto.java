@@ -7,6 +7,7 @@ import by.temniakov.testtask.validation.groups.IdNullInfo;
 import by.temniakov.testtask.validation.groups.UpdateInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -22,36 +23,45 @@ import java.util.List;
 @Validated
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Order object for sending to server")
 public class InOrderDto {
+    @Schema(description = "Customer name",
+            example = "Temniakov Yan ",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
     @NullOrNotBlank( groups = UpdateInfo.class)
     private String username;
 
+    @Schema(description = "Customer phone number",
+            example = "+375295201796",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
     @NullOrNotBlank( groups = UpdateInfo.class)
     @JsonProperty(value = "phone_number")
     private String phoneNumber;
 
+    @Schema(description = "Customer email address",
+            example = "temniakovya@gmail.com",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
     @NullOrNotBlank( groups = UpdateInfo.class)
     @Email(regexp = RegexpConstants.EMAIL, message = "email must be valid")
     @JsonProperty(value = "user_email")
     private String userEmail;
 
+    @Schema(description = "Customer address id for delivery",
+            example = "1",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "must be not null",groups = CreationInfo.class)
     @JsonProperty(value = "id_address")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer addressId;
 
-    @Valid
+    @Schema(description = "Array of started goods in order",
+            minContains = 1,
+            contains = OutGoodDto.class,
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty(value = "order_goods")
     private List<InGoodOrderDto> goodOrders;
-
-    @Null(message = "must be null")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Integer amount;
-
-    @Null(message = "must be null")
-    private BigDecimal price;
 }

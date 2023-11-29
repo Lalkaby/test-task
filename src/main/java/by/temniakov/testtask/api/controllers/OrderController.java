@@ -8,10 +8,13 @@ import by.temniakov.testtask.api.services.OrderService;
 import by.temniakov.testtask.enums.Status;
 import by.temniakov.testtask.store.entities.Orders;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.Parent;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -39,20 +42,26 @@ public class OrderController {
     public static final String DELETE_ORDER = "/orders/{id_order}";
 
     @GetMapping(GET_ORDER)
-    @Operation(tags = {"get"})
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "404", description = "Order not found.")
-    })
+    @Operation(
+            tags = {"get","order"},
+            summary = "Retrieve order by Id",
+            description = "Get a Order object by specifying its id")
     public ResponseEntity<OutOrderDto> getOrderById(
+            @Parameter(description = "Id of retrieving order", example = "1")
             @PathVariable(name = "id_order") Integer orderId) {
 
         return ResponseEntity.of(Optional.of(orderService.getDtoByIdOrThrowException(orderId)));
     }
 
     @GetMapping(FETCH_ORDERS)
-    @Operation(tags = {"get"})
+    @Operation(
+            tags = {"get","order"},
+            summary = "Retrieve sorted orders by page and size and filtered by phone number",
+            description = "Fetch of orders objects with sorting, pagination and filtering by phone number")
     public ResponseEntity<List<OutOrderDto>> fetchFilteredSortedOrders(
-            @RequestParam(name = "phone_number",defaultValue = "",required = false) String phoneNumber,
+            @Parameter(description = "Substring for filtering by phone number", example = "+375")
+            @RequestParam(name = "phone_number",defaultValue = "",required = false)
+            String phoneNumber,
             Pageable pageable) {
 
         return ResponseEntity.of(
@@ -61,7 +70,10 @@ public class OrderController {
     }
 
     @PostMapping(CREATE_ORDER)
-    @Operation(tags = {"post"})
+    @Operation(
+            tags = {"post","order"},
+            summary = "Create a new order",
+            description = "Create a new order from order object ")
     public ResponseEntity<OutOrderDto> createOrder(
             @RequestBody InOrderDto createOrderDto) {
         Orders order = orderService.createOrder(createOrderDto);
@@ -73,8 +85,12 @@ public class OrderController {
     }
 
     @PatchMapping(ADD_ORDER_GOODS)
-    @Operation(tags = {"patch"})
+    @Operation(
+            tags = {"patch","order"},
+            summary = "Add goods to order by Id",
+            description = "Add goods to order by id and array of Good Order object")
     public ResponseEntity<OutOrderDto> addOrderGoods(
+            @Parameter(description = "Order id, where the goods are added", example = "1")
             @PathVariable(name = "id_order") Integer orderId,
             @RequestBody List<InGoodOrderDto> goodOrdersDto){
         goodOrderService.addGoods(orderId, goodOrdersDto);
@@ -84,9 +100,17 @@ public class OrderController {
     }
 
     @PatchMapping(CHANGE_ORDER_STATUS)
-    @Operation(tags = {"patch"})
+    @Operation(
+            tags = {"patch","order"},
+            summary = "Change order delivery status",
+            description = "Change order delivery status")
     public ResponseEntity<OutOrderDto> changeOrderStatus(
+            @Parameter(description = "Order id which status will be changed")
             @PathVariable(name = "id_order") Integer orderId,
+            @Parameter(
+                    description = "New order status",
+                    example = "ACTIVE",
+                    schema = @Schema(implementation = Status.class))
             @RequestParam(name = "new_status") String newStatus){
         Orders order = orderService.changeOrderStatus(orderId, newStatus);
 
@@ -94,8 +118,12 @@ public class OrderController {
     }
 
     @PatchMapping(value = UPDATE_ORDER)
-    @Operation(tags = {"patch"})
-    public ResponseEntity<OutOrderDto> updateOrderGood(
+    @Operation(
+            tags = {"patch","order"},
+            summary = "Update order by Id",
+            description = "Update order by its id and order object")
+    public ResponseEntity<OutOrderDto> updateOrder(
+            @Parameter(description = "Update existing order by id", example = "1")
             @PathVariable(name = "id_order") Integer orderId,
             @RequestBody InOrderDto orderDto){
         OutOrderDto updatedOrderDto = orderService
@@ -106,8 +134,12 @@ public class OrderController {
     }
 
     @DeleteMapping(DELETE_ORDER)
-    @Operation(tags = {"delete"})
+    @Operation(
+            tags = {"delete","order"},
+            summary = "Remove order by Id",
+            description = "Delete order by its id")
     public ResponseEntity<InOrderDto> deleteOrder(
+            @Parameter(description = "Order id to be deleted", example = "1")
             @PathVariable(name="id_order") Integer orderId) {
         orderService.delete(orderId);
 
@@ -115,9 +147,14 @@ public class OrderController {
     }
 
     @DeleteMapping(DELETE_ORDER_GOODS)
-    @Operation(tags = {"delete"})
-    public ResponseEntity<OutOrderDto> deleteOrderGoods(
+    @Operation(
+            tags = {"delete","order"},
+            summary = "Remove good by Id from order by Id",
+            description = "Delete good from order if order is drafting")
+    public ResponseEntity<OutOrderDto> deleteOrderGood(
+            @Parameter(description = "Order id from which the good will be removed", example = "1")
             @PathVariable(name = "id_order") Integer orderId,
+            @Parameter(description = "Good id which will be removed", example = "1")
             @PathVariable(name = "id_good") Integer goodId) {
         goodOrderService.deleteGood(orderId,goodId);
 

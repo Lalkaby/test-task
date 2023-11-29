@@ -1,6 +1,7 @@
 spring:
   jpa:
     show-sql: true
+    open-in-view: true
   datasource:
     driver-class-name: org.postgresql.Driver
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
