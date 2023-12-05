@@ -2,6 +2,7 @@ package by.temniakov.testtask.configuration;
 
 import by.temniakov.testtask.api.mappers.factories.SortGoodFactory;
 import by.temniakov.testtask.api.mappers.factories.SortOrderFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.ExampleMatcher;

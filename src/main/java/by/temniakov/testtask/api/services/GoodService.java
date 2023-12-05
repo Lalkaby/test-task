@@ -11,12 +11,15 @@ import by.temniakov.testtask.store.repositories.GoodRepository;
 import by.temniakov.testtask.validation.groups.CreationInfo;
 import by.temniakov.testtask.validation.groups.IdNullInfo;
 import by.temniakov.testtask.validation.groups.UpdateInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -83,7 +86,8 @@ public class GoodService {
                 .orElseGet(()->goodRepository.saveAndFlush(good));
     }
 
-    public OutGoodDto getDtoFromAddress(Good good){
+
+    public OutGoodDto getDtoFromGood(Good good){
         return goodMapper.toOutDto(good);
     }
 

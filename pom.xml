@@ -32,6 +32,13 @@
         </dependency>
         <!--> Lombok <-->
 
+        <!--> AOP <-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <!--> AOP <-->
+
         <!--> Database <-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

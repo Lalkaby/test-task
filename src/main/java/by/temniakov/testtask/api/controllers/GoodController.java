@@ -2,7 +2,6 @@ package by.temniakov.testtask.api.controllers;
 
 import by.temniakov.testtask.api.dto.InGoodDto;
 import by.temniakov.testtask.api.dto.OutGoodDto;
-import by.temniakov.testtask.api.services.GoodOrderService;
 import by.temniakov.testtask.api.services.GoodService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -78,7 +77,7 @@ public class GoodController {
     public ResponseEntity<OutGoodDto> createGood(
             @RequestBody InGoodDto createGoodDto){
         OutGoodDto createdGoodDto = goodService
-                .getDtoFromAddress(goodService.createGood(createGoodDto));
+                .getDtoFromGood(goodService.createGood(createGoodDto));
 
         return ResponseEntity.of(Optional.of(createdGoodDto));
     }
@@ -93,7 +92,7 @@ public class GoodController {
             @PathVariable(name = "id_good") Integer goodId,
             @RequestBody InGoodDto goodDto){
         OutGoodDto updatedGoodDto = goodService
-                .getDtoFromAddress(goodService.getUpdatedOrExistingGood(goodId, goodDto));
+                .getDtoFromGood(goodService.getUpdatedOrExistingGood(goodId, goodDto));
 
         return ResponseEntity.of(
                 Optional.of(updatedGoodDto));

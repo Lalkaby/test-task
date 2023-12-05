@@ -34,7 +34,7 @@ public class OutGoodDto {
     private Integer amount;
 
     @Schema(description = "Received good producer",
-            example = "69")
+            example = "Golder Final Fields Farm")
     private String producer;
 
     @Schema(description = "Received good price",
