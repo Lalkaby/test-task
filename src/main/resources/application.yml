@@ -1,3 +1,4 @@
+
 spring:
   jpa:
     show-sql: true
@@ -22,18 +23,23 @@ spring:
       matching-strategy: ant_path_matcher
   main:
     allow-circular-references: true
+  kafka:
+    bootstrap-servers: localhost:9093
+    consumer:
+      auto-offset-reset: earliest
+    listener:
+      ack-mode: record
+  application:
+    name: testtask
+
+kafka:
+  topics:
+    good-topic: good
+
 logging:
   level:
     org.springframework:
       orm.jpa: DEBUG
       transaction: DEBUG
-springfox:
-  documentation:
-    swagger-ui:
-      base-url: /myproject
-      enabled: true
-    swagger:
-      v2:
-        enabled: true
-        use-model-v3: true
-    auto-startup: true
+server:
+  port: 8081

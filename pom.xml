@@ -46,7 +46,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons-core</artifactId>
-            <version>1.1.0.RELEASE</version>
+            <version>1.4.1.RELEASE</version>
         </dependency>
         <!--> Database <-->
 
@@ -77,6 +77,14 @@
             <version>2.2.0</version>
         </dependency>
         <!--> Swagger <-->
+
+        <!--> Kafka <-->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <!--> Kafka <-->
 
         <!--> FlyWay <-->
         <dependency>
@@ -129,6 +137,13 @@
                             <version>1.5.5.Final</version>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>by.temniakov.testtask.TestTaskApplication</mainClass>
                 </configuration>
             </plugin>
             <plugin>
