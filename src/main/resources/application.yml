@@ -34,7 +34,11 @@ spring:
 
 kafka:
   topics:
-    good-topic: good
+    good: good
+    order-event: order-event
+delays:
+  order-event:
+    send: 60000
 
 logging:
   level:

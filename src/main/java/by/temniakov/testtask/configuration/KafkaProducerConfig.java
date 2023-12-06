@@ -37,12 +37,4 @@ public class KafkaProducerConfig {
     public KafkaTemplate<String, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
-
-    @Bean
-    public ApplicationRunner runner(KafkaTemplate<String, String> template) {
-        return args -> {
-            template.send("good", "test1");
-            template.send("good",new ObjectMapper().writeValueAsString( OutGoodDto.builder().producer("From serialize").build()));
-        };
-    }
 }

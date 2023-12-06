@@ -1,22 +1,14 @@
 package by.temniakov.testtask.configuration;
 
-import by.temniakov.testtask.api.dto.OutGoodDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.config.SaslConfigs;
-import org.apache.kafka.common.security.plain.PlainLoginModule;
-import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -29,6 +21,7 @@ import java.util.Map;
 @EnableKafka
 @Configuration
 @Log4j2
+@RequiredArgsConstructor
 public class KafkaConsumerConfig {
     @Value(value = "${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
@@ -57,19 +50,5 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
-    }
-
-    @KafkaListener(
-            clientIdPrefix = "test-client",
-            groupId="good-group", topics = "${kafka.topics.good-topic}",containerFactory = "kafkaListenerContainerFactory")
-    public void listenTestTask(ConsumerRecord<String,String> value){
-        log.info("Written info: " + value.topic()+" "+ value.key());
-        log.info("Written message: " + value.value());
-        log.info("Written offset: " + value.offset());
-        try {
-            System.out.println(new ObjectMapper().readValue(value.value(), OutGoodDto.class).getProducer());
-        } catch (JsonProcessingException e) {
-            System.out.println("Not deserialized");;
-        }
     }
 }

@@ -125,6 +125,7 @@ public class OrderController {
     public ResponseEntity<OutOrderDto> updateOrder(
             @Parameter(description = "Update existing order by id", example = "1")
             @PathVariable(name = "id_order") Integer orderId,
+            @Schema(implementation = InOrderDto.class)
             @RequestBody InOrderDto orderDto){
         OutOrderDto updatedOrderDto = orderService
                 .getDtoFromOrder(orderService.getUpdatedOrder(orderId, orderDto));

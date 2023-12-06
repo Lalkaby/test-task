@@ -41,21 +41,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final GoodService goodService;
 
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
 
-    public void sendMessage(String message, String topic) {
-        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, message);
-        future.whenComplete((result, ex) -> {
-            if (ex == null) {
-                System.out.println("Sent message=[" + message +
-                        "] with offset=[" + result.getRecordMetadata().offset() + "]");
-            } else {
-                System.out.println("Unable to send message=[" +
-                        message + "] due to : " + ex.getMessage());
-            }
-        });
-    }
     public void delete(Integer orderId){
         checkExistsAndThrowException(orderId);
 
@@ -253,31 +239,24 @@ public class OrderService {
             switch (order.getStatus()){
                 case DRAFT -> updateDraft(order,newStatus);
                 case ACTIVE -> updateActive(order,newStatus);
-                case CANCELLED,COMPLETED  -> updateToSameOrThrowException(order, newStatus);
+                case CANCELLED,COMPLETED  -> throwIllegalStatusUpdate(order,newStatus);
             }
         }
 
         private static void updateActive(Orders order, Status newStatus){
             switch (newStatus){
-                case ACTIVE,CANCELLED,COMPLETED -> order.setStatus(newStatus);
+                case CANCELLED,COMPLETED -> order.setStatus(newStatus);
                 default -> throwIllegalStatusUpdate(order,newStatus);
             }
         }
 
         private static void updateDraft(Orders order, Status newStatus){
             switch (newStatus){
-                case DRAFT -> order.setStatus(newStatus);
                 case ACTIVE -> {
                     if (order.getGoodAssoc().isEmpty()) throw new EmptyOrderException("Order goods must not be empty", order.getId());
                     order.setStatus(newStatus);
                 }
                 default -> throwIllegalStatusUpdate(order,newStatus);
-            }
-        }
-
-        private static void updateToSameOrThrowException(Orders order, Status newStatus){
-            if (!order.getStatus().equals(newStatus)){
-                throwIllegalStatusUpdate(order,newStatus);
             }
         }
 

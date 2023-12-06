@@ -31,4 +31,9 @@ public class KafkaTopicConfig {
         return new NewTopic("testtask", 1, (short) 1);
     }
 
+    @Bean
+    public NewTopic topicOrderEvent() {
+        return new NewTopic("order-event", 1, (short) 1);
+    }
+
 }

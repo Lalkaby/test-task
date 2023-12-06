@@ -26,7 +26,7 @@ import java.util.List;
 @Schema(description = "Order object for sending to server")
 public class InOrderDto {
     @Schema(description = "Customer name",
-            example = "Temniakov Yan ",
+            example = "Temniakov Yan",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "must contains at least one non-whitespace character", groups = CreationInfo.class)
     @NullOrNotBlank( groups = UpdateInfo.class)
