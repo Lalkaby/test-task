@@ -10,50 +10,36 @@ import by.temniakov.testtask.store.entities.Orders;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.Parent;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/orders")
 @RequiredArgsConstructor
 @Tag(name="order", description = "Order management APIs")
 public class OrderController {
     private final OrderService orderService;
     private final GoodOrderService goodOrderService;
 
-    public static final String GET_ORDER = "/orders/{id_order}";
-    public static final String FETCH_ORDERS = "/orders";
-    public static final String CHANGE_ORDER_STATUS = "/orders/{id_order}/status/change";
-    public static final String ADD_ORDER_GOODS = "/orders/{id_order}/goods";
-    public static final String DELETE_ORDER_GOODS = "/orders/{id_order}/goods/{id_good}";
-    public static final String CREATE_ORDER = "/orders";
-    public static final String UPDATE_ORDER = "/orders/{id_order}";
-    public static final String DELETE_ORDER = "/orders/{id_order}";
-
-    @GetMapping(GET_ORDER)
+    @GetMapping("{id}")
     @Operation(
             tags = {"get","order"},
             summary = "Retrieve order by Id",
             description = "Get a Order object by specifying its id")
     public ResponseEntity<OutOrderDto> getOrderById(
             @Parameter(description = "Id of retrieving order", example = "1")
-            @PathVariable(name = "id_order") Integer orderId) {
+            @PathVariable(name = "id") Integer id) {
 
-        return ResponseEntity.of(Optional.of(orderService.getDtoByIdOrThrowException(orderId)));
+        return ResponseEntity.of(Optional.of(orderService.getDtoByIdOrThrowException(id)));
     }
 
-    @GetMapping(FETCH_ORDERS)
+    @GetMapping
     @Operation(
             tags = {"get","order"},
             summary = "Retrieve sorted orders by page and size and filtered by phone number",
@@ -69,7 +55,7 @@ public class OrderController {
         );
     }
 
-    @PostMapping(CREATE_ORDER)
+    @PostMapping
     @Operation(
             tags = {"post","order"},
             summary = "Create a new order",
@@ -84,70 +70,70 @@ public class OrderController {
         return ResponseEntity.of(Optional.of(orderDto));
     }
 
-    @PatchMapping(ADD_ORDER_GOODS)
+    @PatchMapping("/{id}/goods")
     @Operation(
             tags = {"patch","order"},
             summary = "Add goods to order by Id",
             description = "Add goods to order by id and array of Good Order object")
     public ResponseEntity<OutOrderDto> addOrderGoods(
             @Parameter(description = "Order id, where the goods are added", example = "1")
-            @PathVariable(name = "id_order") Integer orderId,
+            @PathVariable(name = "id") Integer id,
             @RequestBody List<InGoodOrderDto> goodOrdersDto){
-        goodOrderService.addGoods(orderId, goodOrdersDto);
+        goodOrderService.addGoods(id, goodOrdersDto);
 
-        OutOrderDto orderDto = orderService.getDtoByIdOrThrowException(orderId);
+        OutOrderDto orderDto = orderService.getDtoByIdOrThrowException(id);
         return ResponseEntity.of(Optional.of(orderDto));
     }
 
-    @PatchMapping(CHANGE_ORDER_STATUS)
+    @PatchMapping("/{id}/status/change")
     @Operation(
             tags = {"patch","order"},
             summary = "Change order delivery status",
             description = "Change order delivery status")
     public ResponseEntity<OutOrderDto> changeOrderStatus(
             @Parameter(description = "Order id which status will be changed")
-            @PathVariable(name = "id_order") Integer orderId,
+            @PathVariable(name = "id") Integer id,
             @Parameter(
                     description = "New order status",
                     example = "ACTIVE",
                     schema = @Schema(implementation = Status.class))
             @RequestParam(name = "new_status") String newStatus){
-        Orders order = orderService.changeOrderStatus(orderId, newStatus);
+        Orders order = orderService.changeOrderStatus(id, newStatus);
 
         return ResponseEntity.of(Optional.of(orderService.getDtoFromOrder(order)));
     }
 
-    @PatchMapping(value = UPDATE_ORDER)
+    @PatchMapping(value = "{id}")
     @Operation(
             tags = {"patch","order"},
             summary = "Update order by Id",
             description = "Update order by its id and order object")
     public ResponseEntity<OutOrderDto> updateOrder(
             @Parameter(description = "Update existing order by id", example = "1")
-            @PathVariable(name = "id_order") Integer orderId,
+            @PathVariable(name = "id") Integer id,
             @Schema(implementation = InOrderDto.class)
             @RequestBody InOrderDto orderDto){
         OutOrderDto updatedOrderDto = orderService
-                .getDtoFromOrder(orderService.getUpdatedOrder(orderId, orderDto));
+                .getDtoFromOrder(orderService.getUpdatedOrder(id, orderDto));
 
         return ResponseEntity.of(
                 Optional.of(updatedOrderDto));
     }
 
-    @DeleteMapping(DELETE_ORDER)
+    @DeleteMapping("{id}")
     @Operation(
             tags = {"delete","order"},
             summary = "Remove order by Id",
             description = "Delete order by its id")
     public ResponseEntity<InOrderDto> deleteOrder(
             @Parameter(description = "Order id to be deleted", example = "1")
-            @PathVariable(name="id_order") Integer orderId) {
-        orderService.delete(orderId);
+            @PathVariable(name="id") Integer id) {
+        orderService.delete(id);
 
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping(DELETE_ORDER_GOODS)
+    @DeleteMapping("/{id_order}/goods/{id_good}")
     @Operation(
             tags = {"delete","order"},
             summary = "Remove good by Id from order by Id",

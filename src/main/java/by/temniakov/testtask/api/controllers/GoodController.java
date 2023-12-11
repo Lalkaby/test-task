@@ -19,31 +19,24 @@ import java.util.Optional;
 @Validated
 @Transactional
 @RestController
-@RequestMapping("/api")
+@RequestMapping(path = "/api/goods")
 @RequiredArgsConstructor
 @Tag(name="good", description = "Good management APIs")
 public class GoodController {
     private final GoodService goodService;
 
-    public static final String GET_GOOD = "/goods/{id_good}";
-    public static final String FETCH_GOODS = "/goods";
-    public static final String FETCH_SORTED_GOODS = "/goods/sort";
-    public static final String CREATE_GOOD  = "/goods";
-    public static final String DELETE_GOOD  = "/goods/{id_good}";
-    public static final String UPDATE_GOOD = "/goods/{id_good}";
-
-    @GetMapping(GET_GOOD)
+    @GetMapping({"{id}"})
     @Operation(
             tags = {"get","good"},
             summary = "Retrieve good by Id",
             description = "Get a Good object by specifying its id")
     public ResponseEntity<OutGoodDto> getGood(
             @Parameter(description = "Id of retrieving good", example = "1")
-            @PathVariable(name = "id_good") Integer goodId){
-        return ResponseEntity.of(Optional.of(goodService.getDtoByIdOrThrowException(goodId)));
+            @PathVariable(name = "id") Integer id){
+        return ResponseEntity.of(Optional.of(goodService.getDtoByIdOrThrowException(id)));
     }
 
-    @GetMapping(FETCH_GOODS)
+    @GetMapping()
     @Operation(
             tags = {"get","good"},
             summary = "Retrieve goods by page and size",
@@ -56,7 +49,7 @@ public class GoodController {
         return ResponseEntity.of(Optional.of(goodService.findDtoByPage(page,size)));
     }
 
-    @GetMapping(FETCH_SORTED_GOODS)
+    @GetMapping("sort")
     @Operation(
             tags = {"get","good"},
             summary = "Retrieve goods by page, size and sort",
@@ -69,7 +62,7 @@ public class GoodController {
         );
     }
 
-    @PostMapping(CREATE_GOOD)
+    @PostMapping
     @Operation(
             tags = {"post","good"},
             summary = "Create a new good",
@@ -82,31 +75,31 @@ public class GoodController {
         return ResponseEntity.of(Optional.of(createdGoodDto));
     }
 
-    @PatchMapping(value = UPDATE_GOOD)
+    @PatchMapping("{id}")
     @Operation(
             tags = {"patch","good"},
             summary = "Update existing good by id",
             description = "Update good by its id and good object or return already existing good with different id")
     public ResponseEntity<OutGoodDto> updateGood(
             @Parameter(description = "Id of updated good", example = "1")
-            @PathVariable(name = "id_good") Integer goodId,
+            @PathVariable(name = "id") Integer id,
             @RequestBody InGoodDto goodDto){
         OutGoodDto updatedGoodDto = goodService
-                .getDtoFromGood(goodService.getUpdatedOrExistingGood(goodId, goodDto));
+                .getDtoFromGood(goodService.getUpdatedOrExistingGood(id, goodDto));
 
         return ResponseEntity.of(
                 Optional.of(updatedGoodDto));
     }
 
-    @DeleteMapping(DELETE_GOOD)
+    @DeleteMapping("{id}")
     @Operation(
             tags = {"delete","good"},
             summary = "Remove good by Id",
             description = "Delete address by its id")
     public ResponseEntity<OutGoodDto> deleteGood(
             @Parameter(description = "Good id to be deleted", example = "1")
-            @PathVariable(name = "id_good") Integer goodId){
-        goodService.delete(goodId);
+            @PathVariable Integer id){
+        goodService.delete(id);
 
         return ResponseEntity.ok().build();
     }

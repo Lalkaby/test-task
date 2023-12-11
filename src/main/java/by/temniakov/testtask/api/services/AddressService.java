@@ -26,7 +26,6 @@ import java.util.List;
 public class AddressService {
     private final AddressRepository addressRepository;
     private final AddressMapper addressMapper;
-    private final ExampleMatcher exampleMatcherWithIgnoreIdPath;
 
 
     public void delete(Integer addressId){
@@ -104,7 +103,7 @@ public class AddressService {
 
     private Address getUpdatedOrExistingAddress(Address cloneAddress) {
         return addressRepository
-                .findOne(Example.of(cloneAddress, exampleMatcherWithIgnoreIdPath))
+                .findOne(Example.of(cloneAddress, ExampleMatcher.matching().withIgnorePaths("id")))
                 .orElseGet(()->addressRepository.saveAndFlush(cloneAddress));
     }
 

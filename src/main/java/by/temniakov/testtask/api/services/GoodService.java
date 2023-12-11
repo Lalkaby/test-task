@@ -32,7 +32,6 @@ public class GoodService {
     private final GoodRepository goodRepository;
     private final GoodMapper goodMapper;
     private final SortGoodFactory sortGoodFactory;
-    private final ExampleMatcher exampleMatcherWithIgnoreIdPath;
 
     public OutGoodDto getDtoByIdOrThrowException(Integer goodId){
         return goodMapper
@@ -109,7 +108,7 @@ public class GoodService {
 
     private Good getUpdatedOrExistingGood(Good cloneGood){
         return goodRepository
-                .findOne(Example.of(cloneGood, exampleMatcherWithIgnoreIdPath))
+                .findOne(Example.of(cloneGood, ExampleMatcher.matching().withIgnorePaths("id")))
                 .orElseGet(()->goodRepository.saveAndFlush(cloneGood));
     }
 

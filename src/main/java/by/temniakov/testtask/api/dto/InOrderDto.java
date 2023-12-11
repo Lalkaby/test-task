@@ -54,14 +54,12 @@ public class InOrderDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "must be not null",groups = CreationInfo.class)
     @JsonProperty(value = "id_address")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer addressId;
 
     @Schema(description = "Array of started goods in order",
             minContains = 1,
             contains = OutGoodDto.class,
             requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty(value = "order_goods")
     private List<InGoodOrderDto> goodOrders;
 }

@@ -13,11 +13,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableSpringDataWebSupport
 @EnableScheduling
 public class AppConfig {
-    @Bean(name = "exampleMatcherWithIgnoreIdPath")
-    public ExampleMatcher getExampleMatcherWithIgnoreIdPath(){
-        return ExampleMatcher.matching().withIgnorePaths("id");
-    }
-
     @Bean(name = "sortOrderFactory")
     public SortOrderFactory getSortOrderFactory(){
         return new SortOrderFactory();
