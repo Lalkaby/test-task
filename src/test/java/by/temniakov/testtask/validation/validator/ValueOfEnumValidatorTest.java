@@ -16,55 +16,59 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class ValueOfEnumValidatorTest {
     @InjectMocks
     static ValueOfEnumValidator valueOfEnumValidator;
     @Mock
     static ConstraintValidatorContext constraintValidatorContext;
+    @Mock
     static ConstraintValidatorContext.ConstraintViolationBuilder constraintViolationBuilder;
 
-    @BeforeAll
-    static void setUp() {
-        valueOfEnumValidator = new ValueOfEnumValidator();
-        constraintValidatorContext = Mockito.mock(ConstraintValidatorContext.class);
-        constraintViolationBuilder = Mockito.mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-
-        Mockito.when(constraintValidatorContext.buildConstraintViolationWithTemplate(Mockito.anyString()))
+    @BeforeEach
+    void setUpEach() {
+        when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString()))
                 .thenReturn(constraintViolationBuilder);
+    }
+
+    @Test
+    void isValid_ShouldReturnTrueForNull(){
+        assertTrue(valueOfEnumValidator.isValid(null,constraintValidatorContext));
+        verifyNoInteractions(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString()));
     }
 
     @ParameterizedTest
     @EnumSource(City.class)
     void isValid_ShouldReturnTrueForCities(City city) {
         valueOfEnumValidator.initialize(enumCity());
-        Assertions.assertTrue(valueOfEnumValidator.isValid(city.toString(),constraintValidatorContext));
+        assertTrue(valueOfEnumValidator.isValid(city.toString(),constraintValidatorContext));
     }
 
     @ParameterizedTest
     @EnumSource(Currency.class)
     void isValid_ShouldReturnTrueForCurrencies(Currency currency) {
         valueOfEnumValidator.initialize(enumCurrency());
-        Assertions.assertTrue(valueOfEnumValidator.isValid(currency.toString(),constraintValidatorContext));
+        assertTrue(valueOfEnumValidator.isValid(currency.toString(),constraintValidatorContext));
     }
 
     @ParameterizedTest
     @EnumSource(Status.class)
     void isValid_ShouldReturnTrueForStatuses(Status status) {
         valueOfEnumValidator.initialize(enumStatus());
-        Assertions.assertTrue(valueOfEnumValidator.isValid(status.toString(),constraintValidatorContext));
-    }
-
-    @Test
-    void isValid_ShouldReturnTrueForNull(){
-        Assertions.assertTrue(valueOfEnumValidator.isValid(null,constraintValidatorContext));
+        assertTrue(valueOfEnumValidator.isValid(status.toString(),constraintValidatorContext));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"MINSK","USD","BACKFLIP"})
     void isValid_ShouldReturnFalseForNotStatusStrings(String input){
         valueOfEnumValidator.initialize(enumStatus());
-        Assertions.assertFalse(valueOfEnumValidator.isValid(input,constraintValidatorContext));
+        assertFalse(valueOfEnumValidator.isValid(input,constraintValidatorContext));
     }
 
 

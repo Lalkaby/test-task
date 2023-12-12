@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${SPRING_DATASOURCE_NAME:postgres}
+  kafka:
+    bootstrap-servers: localhost:9093
+    consumer:
+      value-deserializer:
+      key-deserializer:
+    producer:
+      key-serializer:
+      value-serializer:

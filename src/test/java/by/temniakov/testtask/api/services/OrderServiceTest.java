@@ -9,46 +9,49 @@ import by.temniakov.testtask.store.entities.GoodOrder;
 import by.temniakov.testtask.store.entities.Orders;
 import by.temniakov.testtask.store.repositories.OrderRepository;
 import by.temniakov.testtask.store.repositories.OrderRepositoryCustomImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+//@ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = OrderService.class)
 class OrderServiceTest {
-    @InjectMocks
+    @Autowired
     OrderService orderService;
-    @Mock
+    @MockBean
     OrderRepository orderRepository;
-    @Mock
+    @MockBean
     OrderRepositoryCustomImpl orderRepositoryCustom;
-    @Mock
+    @MockBean
     SortOrderFactory sortOrderFactory;
-    @Mock
+    @MockBean
     OrderMapper orderMapper;
-    @Mock
+    @MockBean
     GoodService goodService;
-
-
+    @Mock
+    List<GoodOrder> list;
 
     @Test
     void changeStatus_ShouldThrowEmptyOrderExceptionForEmptyDraftOrder(){
         when(orderRepository.findById(anyInt()))
                 .thenReturn(Optional.of(getEmptyDraftOrder()));
 
-        Assertions.assertThrows(
+        assertThrows(
                 EmptyOrderException.class,
                 ()->orderService.changeOrderStatus(1,"ACTIVE"));
     }
@@ -59,7 +62,7 @@ class OrderServiceTest {
         when(orderRepository.findById(anyInt()))
                 .thenReturn(Optional.of(getEmptyDraftOrder()));
 
-        Assertions.assertThrows(
+        assertThrows(
                 UpdateOrderStatusException.class,
                 ()->orderService.changeOrderStatus(1,status.toString()));
     }
@@ -70,34 +73,27 @@ class OrderServiceTest {
         when(orderRepository.findById(anyInt()))
                 .thenReturn(Optional.of(getEmptyOrderByStatus(Status.ACTIVE)));
 
-        Assertions.assertThrows(
+        assertThrows(
                 UpdateOrderStatusException.class,
                 ()->orderService.changeOrderStatus(1,status.toString()));
     }
 
     @ParameterizedTest
     @EnumSource(value = Status.class)
-    void changeStatus_ShouldThrowUpdateOrderStatusExceptionForDraftCancelled(Status status){
-        when(orderRepository.findById(anyInt()))
-                .thenReturn(Optional.of(getEmptyOrderByStatus(Status.CANCELLED)));
-
-        Assertions.assertThrows(
-                UpdateOrderStatusException.class,
-                ()->orderService.changeOrderStatus(1,status.toString()));
+    void changeStatus_ShouldThrowUpdateOrderStatusExceptionForCancelledAndCompleted(Status status){
+        assertAll(()->{
+                    when(orderRepository.findById(anyInt()))
+                            .thenReturn(Optional.of(getEmptyOrderByStatus(Status.CANCELLED)));
+                    assertThrows(UpdateOrderStatusException.class,
+                            ()->orderService.changeOrderStatus(1,status.toString()));},
+                ()->{
+                    when(orderRepository.findById(anyInt()))
+                            .thenReturn(Optional.of(getEmptyOrderByStatus(Status.COMPLETED)));
+                    assertThrows(UpdateOrderStatusException.class,
+                            ()->orderService.changeOrderStatus(1,status.toString()));
+                });
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Status.class)
-    void changeStatus_ShouldThrowUpdateOrderStatusExceptionForDraftCompleted(Status status){
-        when(orderRepository.findById(anyInt()))
-                .thenReturn(Optional.of(getEmptyOrderByStatus(Status.COMPLETED)));
-
-        Assertions.assertThrows(
-                UpdateOrderStatusException.class,
-                ()->orderService.changeOrderStatus(1,status.toString()));
-    }
-
-    // TODO: 11.12.2023 add the remaining tests
     @Test
     void changeStatus_ShouldChangeStatusToActiveForDraftOrder(){
         Orders order = getNotEmptyOrder();
@@ -110,9 +106,34 @@ class OrderServiceTest {
 
         verify(orderRepository).findById(1);
         verify(order.getGoodAssoc()).isEmpty();
-        Assertions.assertSame(Status.ACTIVE,order.getStatus());
+        assertSame(Status.ACTIVE,order.getStatus());
     }
 
+    @Test
+    void changeStatus_ShouldChangeStatusToCompleteForActiveOrder(){
+        Orders order = getEmptyOrderByStatus(Status.ACTIVE);
+        when(orderRepository.findById(anyInt()))
+                .thenReturn(Optional.of(order));
+        try {
+            orderService.changeOrderStatus(1,Status.COMPLETED.toString());
+        }catch (Exception ignored){}
+
+        verify(orderRepository).findById(1);
+        assertSame(Status.COMPLETED,order.getStatus());
+    }
+
+    @Test
+    void changeStatus_ShouldChangeStatusToCancelledForActiveOrder(){
+        Orders order = getEmptyOrderByStatus(Status.ACTIVE);
+        when(orderRepository.findById(anyInt()))
+                .thenReturn(Optional.of(order));
+        try {
+            orderService.changeOrderStatus(1,Status.CANCELLED.toString());
+        }catch (Exception ignored){}
+
+        verify(orderRepository).findById(1);
+        assertSame(Status.CANCELLED,order.getStatus());
+    }
 
     private Orders getEmptyDraftOrder(){
         return Orders.builder().build();
@@ -126,11 +147,7 @@ class OrderServiceTest {
 
     private Orders getNotEmptyOrder(){
         return Orders.builder()
-                .goodAssoc(getMockList())
+                .goodAssoc(list)
                 .build();
-    }
-
-    private List<GoodOrder> getMockList(){
-        return Mockito.mock(List.class);
     }
 }

@@ -19,7 +19,7 @@ public class OrderEventListener {
     @KafkaListener(
             clientIdPrefix = "test-client",
             groupId="good-group",
-            topics = {"${kafka.topics.good}"},
+            topics = "good",
             containerFactory = "kafkaListenerContainerFactory")
     public void listenTestTask(ConsumerRecord<String,String> record){
         log.info("Written info: " + record.topic()+" "+ record.key());
@@ -35,7 +35,7 @@ public class OrderEventListener {
     @KafkaListener(
             clientIdPrefix = "order-event-client",
             groupId="order-event-group",
-            topics = "${kafka.topics.order-event}",
+            topics = "order-event",
             containerFactory = "kafkaListenerContainerFactory")
     public void listenOrderEvents(ConsumerRecord<String,String> record){
         log.info("Listened order event:");

@@ -21,7 +21,8 @@ public class GoodOrder {
     private Good good;
 
     @Id
-    @ManyToOne(targetEntity = Orders.class,cascade = {CascadeType.REFRESH,CascadeType.PERSIST})
+    @ManyToOne(targetEntity = Orders.class,
+            cascade = {CascadeType.REFRESH,CascadeType.PERSIST})
     @JoinColumn(name = "id_order", referencedColumnName = "id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

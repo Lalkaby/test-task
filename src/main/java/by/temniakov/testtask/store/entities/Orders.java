@@ -54,7 +54,7 @@ public class Orders {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToMany(mappedBy = "order",cascade = {CascadeType.REFRESH,CascadeType.PERSIST,CascadeType.REMOVE},
-            targetEntity = GoodOrder.class, fetch = FetchType.LAZY)
+            targetEntity = GoodOrder.class)
     @BatchSize(size = 25)
     private List<GoodOrder> goodAssoc = new ArrayList<>();
 }

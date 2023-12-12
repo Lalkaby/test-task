@@ -22,6 +22,7 @@ public abstract class OrderMapper{
         this.addressService = addressService;
     }
 
+    // TODO: 12.12.2023 write queries for goodAssoc
     @Mapping(expression =
             "java(entity.getGoodAssoc().stream().mapToInt(GoodOrder::getAmount).sum())",
             target = "amount")

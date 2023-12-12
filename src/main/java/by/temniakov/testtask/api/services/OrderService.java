@@ -18,8 +18,10 @@ import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
@@ -199,12 +201,15 @@ public class OrderService {
                 .toOutDto(getByIdOrThrowException(orderId));
     }
 
+    // TODO: 12.12.2023 blyat logic
     public Orders getByIdOrThrowException(Integer orderId){
-        return orderRepository
+        Orders result = orderRepository
                 .findById(orderId)
                 .orElseThrow(()->
                         new NotFoundException("Order doesn't exists.", orderId)
                 );
+
+        return result;
     }
 
     @Validated(value = {UpdateInfo.class,Default.class})

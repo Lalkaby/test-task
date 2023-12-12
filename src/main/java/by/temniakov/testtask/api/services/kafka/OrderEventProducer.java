@@ -19,8 +19,8 @@ public class OrderEventProducer {
     private final OrderEventService orderEventService;
     private final ObjectMapper objectMapper;
 
-    @Value(value = "${kafka.topics.order-event}")
-    private  String ORDER_EVENT_TOPIC;
+    private  final String ORDER_EVENT_TOPIC = "order-event";
+
     @Scheduled(fixedRateString = "${delays.order-event.send}")
     public void sendOrderEvent(){
         List<OrderEvent> events = orderEventService.findAllAmount(100).toList();
