@@ -11,24 +11,15 @@ import by.temniakov.testtask.store.entities.GoodOrder;
 import by.temniakov.testtask.store.entities.Orders;
 import by.temniakov.testtask.store.repositories.OrderRepository;
 import by.temniakov.testtask.store.repositories.OrderRepositoryCustomImpl;
-import by.temniakov.testtask.validation.annotation.ValueOfEnum;
-import by.temniakov.testtask.validation.groups.CreationInfo;
-import by.temniakov.testtask.validation.groups.UpdateInfo;
 import jakarta.annotation.Nonnull;
-import jakarta.validation.Valid;
-import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
 import java.util.List;
 
 @Service
-@Validated
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
@@ -60,7 +51,7 @@ public class OrderService {
     }
 
     public Orders changeOrderStatus(
-            Integer orderId, @ValueOfEnum(enumClass = Status.class)String newStatus){
+            Integer orderId, String newStatus){
         Status status = Status.valueOf(newStatus);
         Orders order = getByIdOrThrowException(orderId);
         OrderStatusChanger.changeStatus(order, status);
@@ -212,9 +203,8 @@ public class OrderService {
         return result;
     }
 
-    @Validated(value = {UpdateInfo.class,Default.class})
     public Orders getUpdatedOrder(
-            Integer orderId,@Valid InOrderDto orderDto){
+            Integer orderId, InOrderDto orderDto){
         Orders order = getByIdOrThrowException(orderId);
         orderMapper.updateFromDto(orderDto, order);
 
@@ -225,9 +215,7 @@ public class OrderService {
         return orderMapper.toOutDto(order);
     }
 
-    @Validated(value = {CreationInfo.class, Default.class})
-    public Orders createOrder(
-            @Valid InOrderDto createOrderDto){
+    public Orders createOrder(InOrderDto createOrderDto){
         Orders order = orderMapper.fromDto(createOrderDto);
         return saveAndFlush(order);
     }

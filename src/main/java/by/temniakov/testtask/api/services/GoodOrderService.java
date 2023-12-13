@@ -10,7 +10,6 @@ import by.temniakov.testtask.store.entities.GoodOrderId;
 import by.temniakov.testtask.store.entities.Orders;
 import by.temniakov.testtask.store.repositories.GoodOrderRepository;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -95,8 +94,7 @@ public class GoodOrderService {
     }
 
     @Transactional
-    @Validated(value = Default.class)
-    public void addGoods(Integer orderId, List<@Valid InGoodOrderDto> goodOrdersDto){
+    public void addGoods(Integer orderId, List< InGoodOrderDto> goodOrdersDto){
         Orders order = orderService.getByIdOrThrowException(orderId);
         addGoods(order, goodOrdersDto);
     }

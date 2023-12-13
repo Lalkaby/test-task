@@ -8,25 +8,13 @@ import by.temniakov.testtask.api.mappers.GoodMapper;
 import by.temniakov.testtask.api.mappers.factories.SortGoodFactory;
 import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.repositories.GoodRepository;
-import by.temniakov.testtask.validation.groups.CreationInfo;
-import by.temniakov.testtask.validation.groups.IdNullInfo;
-import by.temniakov.testtask.validation.groups.UpdateInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
 @Service
-@Validated
 @RequiredArgsConstructor
 public class GoodService {
     private final GoodRepository goodRepository;
@@ -52,9 +40,7 @@ public class GoodService {
         }
     }
 
-    public List<OutGoodDto> findDtoByPage(
-            @Min(value = 0, message = "must be not less than 0") Integer page,
-            @Min(value = 1,message = "must be not less than 1")Integer size) {
+    public List<OutGoodDto> findDtoByPage(Integer page,Integer size) {
         return goodRepository
                 .findAll(PageRequest.of(page,size))
                 .map(goodMapper::toOutDto)
@@ -62,8 +48,7 @@ public class GoodService {
     }
 
 
-    public List<OutGoodDto> findSortedDtoByPageable(
-            @PageableDefault(page = 0, size = 50) Pageable pageable){
+    public List<OutGoodDto> findSortedDtoByPageable(Pageable pageable){
         Sort newSort = Sort.by(pageable.getSort()
                 .filter(order -> sortGoodFactory.getFilterKeys().contains(order.getProperty()))
                 .map(sortGoodFactory::fromJsonSortOrder)
@@ -76,9 +61,7 @@ public class GoodService {
                 .toList();
     }
 
-    @Validated(value = {CreationInfo.class, Default.class})
-    public Good createGood(
-          @Valid InGoodDto createGoodDto){
+    public Good createGood(InGoodDto createGoodDto){
         Good good = goodMapper.fromDto(createGoodDto);
         return goodRepository
                 .findOne(Example.of(good))
@@ -90,9 +73,8 @@ public class GoodService {
         return goodMapper.toOutDto(good);
     }
 
-    @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class})
     public Good getUpdatedOrExistingGood(
-            Integer goodId, @Valid  InGoodDto goodDto){
+            Integer goodId, InGoodDto goodDto){
         Good good = getByIdOrThrowException(goodId);
 
         Good cloneGood = goodMapper.clone(good);

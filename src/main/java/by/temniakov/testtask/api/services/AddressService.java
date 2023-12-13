@@ -7,21 +7,13 @@ import by.temniakov.testtask.api.exceptions.NotFoundException;
 import by.temniakov.testtask.api.mappers.AddressMapper;
 import by.temniakov.testtask.store.entities.Address;
 import by.temniakov.testtask.store.repositories.AddressRepository;
-import by.temniakov.testtask.validation.groups.CreationInfo;
-import by.temniakov.testtask.validation.groups.IdNullInfo;
-import by.temniakov.testtask.validation.groups.UpdateInfo;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
 @Service
-@Validated
 @RequiredArgsConstructor
 public class AddressService {
     private final AddressRepository addressRepository;
@@ -44,9 +36,7 @@ public class AddressService {
         return addressRepository.findAll(pageable);
     }
 
-    public List<OutAddressDto> findDtoByPage(
-            @Min(value = 0, message = "must be not less than 0") Integer page,
-            @Min(value = 1, message = "must be not less than 1") Integer size) {
+    public List<OutAddressDto> findDtoByPage(Integer page, Integer size) {
         return findAll(PageRequest.of(page,size))
                 .map(addressMapper::toOutDto)
                 .toList();
@@ -72,9 +62,8 @@ public class AddressService {
         }
     }
 
-    @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class})
     public Address getUpdatedOrExistingAddress(
-            Integer addressId, @Valid InAddressDto addressDto) {
+            Integer addressId, InAddressDto addressDto) {
         Address address = getByIdOrThrowException(addressId);
 
         Address cloneAddress = addressMapper.clone(address);
@@ -88,9 +77,7 @@ public class AddressService {
         return savedAddress;
     }
 
-    @Validated(value = {CreationInfo.class, Default.class})
-    public Address createAddress(
-           @Valid InAddressDto createAddressDto) {
+    public Address createAddress(InAddressDto createAddressDto) {
         Address address = addressMapper.fromDto(createAddressDto);
         return addressRepository
                 .findOne(Example.of(address))
