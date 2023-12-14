@@ -17,6 +17,7 @@ import java.util.concurrent.Executor;
 
 @Configuration
 @EnableAsync
+@EnableWebMvc
 public class WebMvcConfig implements AsyncConfigurer, WebMvcConfigurer {
     @Override
     public void addFormatters(@Nonnull FormatterRegistry registry) {

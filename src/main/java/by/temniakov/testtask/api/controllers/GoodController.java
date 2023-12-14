@@ -3,10 +3,10 @@ package by.temniakov.testtask.api.controllers;
 import by.temniakov.testtask.api.dto.InGoodDto;
 import by.temniakov.testtask.api.dto.OutGoodDto;
 import by.temniakov.testtask.api.services.GoodService;
+import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.validation.groups.CreationInfo;
-import by.temniakov.testtask.validation.groups.IdNullInfo;
-import by.temniakov.testtask.validation.groups.UpdateInfo;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.groups.Default;
@@ -74,19 +74,19 @@ public class GoodController {
         return ResponseEntity.of(Optional.of(createdGoodDto));
     }
 
-    @PatchMapping("{id}")
+    @PatchMapping("{id}/amount/change")
     @Operation(
             tags = {"patch","good"},
-            description = "Update good by its id and good object or return already existing good with different id")
-    public ResponseEntity<OutGoodDto> updateGood(
+            description = "Update good stock level by difference")
+    public ResponseEntity<OutGoodDto> updateGoodAmount(
             @PathVariable(name = "id") Integer id,
-            @Validated(value = {UpdateInfo.class, IdNullInfo.class, Default.class})
-            @RequestBody InGoodDto goodDto){
-        OutGoodDto updatedGoodDto = goodService
-                .getDtoFromGood(goodService.getUpdatedOrExistingGood(id, goodDto));
+            @RequestParam("diff_amount")
+            @Parameter(example = "-5")
+            Integer diffAmount){
+        Good good = goodService.changeStockGoods(id,diffAmount);
 
         return ResponseEntity.of(
-                Optional.of(updatedGoodDto));
+                Optional.of(goodService.getDtoFromGood(good)));
     }
 
     @DeleteMapping("{id}")

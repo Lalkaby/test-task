@@ -3,16 +3,25 @@ package by.temniakov.testtask.api.services;
 import by.temniakov.testtask.api.dto.InGoodDto;
 import by.temniakov.testtask.api.dto.OutGoodDto;
 import by.temniakov.testtask.api.exceptions.InUseException;
+import by.temniakov.testtask.api.exceptions.InvalidStockLevelException;
 import by.temniakov.testtask.api.exceptions.NotFoundException;
 import by.temniakov.testtask.api.mappers.GoodMapper;
 import by.temniakov.testtask.api.mappers.factories.SortGoodFactory;
+import by.temniakov.testtask.enums.Status;
 import by.temniakov.testtask.store.entities.Good;
 import by.temniakov.testtask.store.repositories.GoodRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +36,15 @@ public class GoodService {
     }
 
     public Good getByIdOrThrowException(Integer goodId){
-        return goodRepository
+        Good good = goodRepository
                 .findById(goodId)
                 .orElseThrow(()->
                         new NotFoundException("Good doesn't exists.", goodId)
                 );
+
+        fillNumberOrders(List.of(good));
+
+        return good;
     }
 
     public void checkExistsAndThrowException(Integer goodId) {
@@ -41,12 +54,34 @@ public class GoodService {
     }
 
     public List<OutGoodDto> findDtoByPage(Integer page,Integer size) {
-        return goodRepository
-                .findAll(PageRequest.of(page,size))
+        List<Good> goods = findAllBy(PageRequest.of(page,size));
+        return goods
+                .stream()
                 .map(goodMapper::toOutDto)
                 .toList();
     }
 
+    private List<Good> findAllBy(PageRequest page) {
+        List<Good> goods = goodRepository.findAllBy(page);
+        fillNumberOrders(goods);
+        return goods;
+    }
+
+    private void fillNumberOrders(List<Good> goods) {
+        Map<Integer, Integer> numberOrder = getNumberOrders(
+                goods.stream().map(Good::getId).toList());
+        goods.forEach(good -> good
+                .setNumberOrders(numberOrder.get(good.getId())));
+    }
+
+    private Map<Integer, Integer> getNumberOrders(List<Integer> goodIds){
+        return goodRepository
+                .getCountGoodByOrderStatus(goodIds,Status.COMPLETED)
+                .stream()
+                .collect(Collectors.toMap(
+                        x->x.get(0, Integer.class),
+                        x->x.get(1, Long.class).intValue()));
+    }
 
     public List<OutGoodDto> findSortedDtoByPageable(Pageable pageable){
         Sort newSort = Sort.by(pageable.getSort()
@@ -55,43 +90,35 @@ public class GoodService {
                 .toList());
         PageRequest newPage = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
 
-        return goodRepository
-                .findAll(newPage)
+        return findAllBy(newPage)
+                .stream()
                 .map(goodMapper::toOutDto)
                 .toList();
     }
 
     public Good createGood(InGoodDto createGoodDto){
         Good good = goodMapper.fromDto(createGoodDto);
-        return goodRepository
-                .findOne(Example.of(good))
-                .orElseGet(()->goodRepository.saveAndFlush(good));
+        return getExistingOrCreateNew(good);
     }
 
+    private Good getExistingOrCreateNew(Good good) {
+        Good example = Good.builder()
+                .producer(good.getProducer())
+                .title(good.getTitle())
+                .currency(good.getCurrency())
+                .build();
 
-    public OutGoodDto getDtoFromGood(Good good){
-        return goodMapper.toOutDto(good);
-    }
+        Good savedGood = goodRepository
+                .findOne(Example.of(example))
+                .orElseGet(() -> goodRepository.saveAndFlush(good));
 
-    public Good getUpdatedOrExistingGood(
-            Integer goodId, InGoodDto goodDto){
-        Good good = getByIdOrThrowException(goodId);
-
-        Good cloneGood = goodMapper.clone(good);
-        goodMapper.updateFromDto(goodDto,cloneGood);
-        Good savedGood = cloneGood;
-
-        if (!cloneGood.equals(good)){
-            savedGood = getUpdatedOrExistingGood(cloneGood);
-        }
+        fillNumberOrders(List.of(savedGood));
 
         return savedGood;
     }
-
-    private Good getUpdatedOrExistingGood(Good cloneGood){
-        return goodRepository
-                .findOne(Example.of(cloneGood, ExampleMatcher.matching().withIgnorePaths("id")))
-                .orElseGet(()->goodRepository.saveAndFlush(cloneGood));
+    
+    public OutGoodDto getDtoFromGood(Good good){
+        return goodMapper.toOutDto(good);
     }
 
     public void delete(Integer goodId){
@@ -122,5 +149,21 @@ public class GoodService {
 
     public List<Integer> getExistingIds(List<Integer> goodIds) {
         return goodRepository.getExistingIds(goodIds);
+    }
+
+    @Transactional
+    public Good changeStockGoods(Integer id, Integer diffAmount) {
+        Good good = getByIdOrThrowException(id);
+        Integer newAmount= good.getAmount()+diffAmount;
+        if (newAmount<0){
+            throw new InvalidStockLevelException(
+                    "Goods amount can't be less than 0",
+                    good.getId(),
+                    good.getAmount());
+        }
+
+        good.setAmount(newAmount);
+
+        return good;
     }
 }

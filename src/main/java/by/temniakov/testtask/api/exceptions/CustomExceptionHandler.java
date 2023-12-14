@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.net.URI;
 import java.util.List;
 
-@Log4j2
 @RestControllerAdvice
 public class CustomExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
@@ -48,6 +47,18 @@ public class CustomExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(InvalidStockLevelException.class)
+    public ProblemDetail invalidGoodStockLevelHandler(InvalidStockLevelException exception){
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setType(URI.create("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"));
+        problemDetail.setTitle("Invalid good stock level.");
+        problemDetail.setDetail(exception.getMessage());
+        problemDetail.setProperty("goodId",exception.getGoodId());
+        problemDetail.setProperty("currentLevel", exception.getCurrentLevel());
+
+        return problemDetail;
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail validationHandler(ConstraintViolationException exception){
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -72,7 +83,6 @@ public class CustomExceptionHandler {
         problemDetail.setProperty("invalidParams",paramErrors);
         return problemDetail;
     }
-
 
     record FieldError(String field, String message){}
     record ParamError(String param, String message){}

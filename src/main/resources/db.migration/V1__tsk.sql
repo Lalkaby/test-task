@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS good(
 alter table good add constraint good_id_pk
     primary key(id);
 alter table good add constraint good_title_producer_unique
-    unique (title,producer);
+    unique (title,producer,currency);
 alter table good add constraint good_price_check
     check (price >= 0.0);
 alter table good add constraint good_amount_check

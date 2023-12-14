@@ -4,6 +4,7 @@ import by.temniakov.testtask.enums.Currency;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -35,6 +36,9 @@ public class Good {
     @Column
     @Enumerated(EnumType.STRING)
     private Currency currency;
+
+    @Transient
+    private Integer numberOrders;
 
     @Builder.Default
     @OneToMany(mappedBy = "good",
