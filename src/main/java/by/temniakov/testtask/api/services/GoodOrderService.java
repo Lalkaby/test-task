@@ -31,6 +31,7 @@ public class GoodOrderService {
     private final OrderService orderService;
     private final GoodService goodService;
 
+    // TODO: 18.12.2023 Exists by custom id 
     public void checkExistsAndThrowException(GoodOrderId goodOrderId){
         if (!goodOrderRepository.existsById(goodOrderId)){
             throw new NotFoundException("No such good in the order", goodOrderId.getGood());
@@ -48,9 +49,7 @@ public class GoodOrderService {
         goodOrderRepository.deleteById(goodOrderId);
     }
 
-    @Transactional
-    @Validated(value = Default.class)
-    public void addGoods(Orders order, List<@Valid InGoodOrderDto> goodOrdersDto){
+    public void addGoods(Orders order, List<InGoodOrderDto> goodOrdersDto){
         Status status = order.getStatus();
         if (!status.equals(Status.DRAFT)){
             throw new OrderStatusException("Can't update not the draft order.", order.getId(), status);
@@ -118,7 +117,7 @@ public class GoodOrderService {
     }
 
     private void checkOrderStatusForRemove(GoodOrderId goodOrderId){
-        Status status = orderService.getOrderStatusById(goodOrderId.getOrder());
+        Status status = orderService.getOrderStatusById(goodOrderId.getOrder().intValue());
         if (!status.equals(Status.DRAFT)){
             throw new OrderStatusException(
                     "Can't update not the draft order.",

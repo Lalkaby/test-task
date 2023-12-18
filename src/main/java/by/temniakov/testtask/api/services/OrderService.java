@@ -15,9 +15,12 @@ import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,16 +72,15 @@ public class OrderService {
         return orderRepository.saveAndFlush(order);
     }
 
-    public Page<Orders> findAll(Pageable pageable){
-        return orderRepository.findAll(pageable);
+    public List<Orders> findAll(Pageable pageable){
+        return orderRepository.findAllBy(pageable);
     }
 
-    public Page<Orders> findAll(Example<Orders> example,Pageable pageable) {
-        return orderRepository.findAll(example, pageable);
+    public List<Orders> findAllByPhoneNumber(String phoneNumber,Pageable pageable) {
+        return orderRepository.findAllByPhoneNumberContaining(phoneNumber, pageable);
     }
 
-    public Orders saveAndFlush(Orders order){return orderRepository.saveAndFlush(order);
-    }
+    public Orders saveAndFlush(Orders order){return orderRepository.saveAndFlush(order);}
 
     public Orders save(Orders order){
         return orderRepository.save(order);
@@ -156,17 +158,16 @@ public class OrderService {
                 .toList());
 
         PageRequest newPage = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), newSort);
-        Page<Orders> resultPage;
+        List<Orders> result;
         if (!phoneNumber.isEmpty()){
-            Example<Orders> filterExample = getFilterExample(phoneNumber);
-            resultPage = findAll(filterExample,newPage);
+            result = findAllByPhoneNumber(phoneNumber,newPage);
         }
         else{
-            resultPage = findAll(newPage);
+            result = findAll(newPage);
         }
 
-
-        return resultPage
+        return result
+                .stream()
                 .map(orderMapper::toOutDto)
                 .toList();
     }
@@ -192,7 +193,6 @@ public class OrderService {
                 .toOutDto(getByIdOrThrowException(orderId));
     }
 
-    // TODO: 12.12.2023 blyat logic
     public Orders getByIdOrThrowException(Integer orderId){
         Orders result = orderRepository
                 .findById(orderId)
@@ -203,21 +203,38 @@ public class OrderService {
         return result;
     }
 
+    private void fillAmountOfGoods(List<Orders> orders) {
+        Map<Integer, Integer> numberOrder = getAmountOfGoods(
+                orders.stream().map(Orders::getId).toList());
+        orders.forEach(good -> good
+                .setAmount(numberOrder.get(good.getId())));
+    }
+
+    private Map<Integer, Integer> getAmountOfGoods(List<Integer> orderIds){
+        return orderRepository
+                .getOrdersAmountOfGoods(orderIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        x->x.get(0, Integer.class),
+                        x->x.get(1, Long.class).intValue()));
+    }
+
+    @Transactional
     public Orders getUpdatedOrder(
             Integer orderId, InOrderDto orderDto){
         Orders order = getByIdOrThrowException(orderId);
         orderMapper.updateFromDto(orderDto, order);
 
-        return saveAndFlush(order);
+        return order;
     }
 
     public OutOrderDto getDtoFromOrder(Orders order){
         return orderMapper.toOutDto(order);
     }
 
+    @Transactional
     public Orders createOrder(InOrderDto createOrderDto){
-        Orders order = orderMapper.fromDto(createOrderDto);
-        return saveAndFlush(order);
+        return save(orderMapper.fromDto(createOrderDto));
     }
 
     private static class OrderStatusChanger{

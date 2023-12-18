@@ -22,16 +22,13 @@ public abstract class OrderMapper{
         this.addressService = addressService;
     }
 
-    // TODO: 12.12.2023 write queries for goodAssoc
-    @Mapping(expression =
-            "java(entity.getGoodAssoc().stream().mapToInt(GoodOrder::getAmount).sum())",
-            target = "amount")
     @Mapping(expression =
             "java(entity.getGoodAssoc().stream().map(goodOrderMapper::toOutGoodDto).toList())"
             ,target = "goods")
     @Mapping(expression =
             "java(entity.getGoodAssoc().stream().map(x->x.getGood().getPrice().multiply(BigDecimal.valueOf(x.getAmount()))).reduce(BigDecimal.ZERO,BigDecimal::add))"
             ,target = "price")
+    @Mapping(target = "amount",defaultValue = "0")
     public abstract OutOrderDto toOutDto(Orders entity);
 
     @Mapping(target = "goodAssoc",ignore = true)

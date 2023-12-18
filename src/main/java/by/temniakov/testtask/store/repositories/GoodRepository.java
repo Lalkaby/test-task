@@ -14,9 +14,6 @@ import java.util.stream.Stream;
 
 public interface GoodRepository
         extends JpaRepository<Good,Integer> {
-    Stream<Good> findAllByPriceLessThan(Double price, Pageable pageable);
-    Stream<Good> findAllByPriceGreaterThan(Double price, Pageable pageable);
-
     @Query(nativeQuery = true,
             value = "select count(*) from good_order where id_good=:goodId")
     Integer countOrdersWithGoodById(Integer goodId);

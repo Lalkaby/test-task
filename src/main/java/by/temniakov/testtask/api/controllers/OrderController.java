@@ -68,8 +68,6 @@ public class OrderController {
             @Validated(value = {CreationInfo.class, Default.class})
             @RequestBody InOrderDto createOrderDto) {
         Orders order = orderService.createOrder(createOrderDto);
-        goodOrderService.addGoods(order, createOrderDto.getGoodOrders());
-        orderService.refresh(order);
 
         OutOrderDto orderDto = orderService.getDtoFromOrder(order);
         return ResponseEntity.of(Optional.of(orderDto));

@@ -75,12 +75,12 @@ public class GoodService {
     }
 
     private Map<Integer, Integer> getNumberOrders(List<Integer> goodIds){
-        return goodRepository
-                .getCountGoodByOrderStatus(goodIds,Status.COMPLETED)
-                .stream()
-                .collect(Collectors.toMap(
-                        x->x.get(0, Integer.class),
-                        x->x.get(1, Long.class).intValue()));
+    return goodRepository
+            .getCountGoodByOrderStatus(goodIds,Status.COMPLETED)
+            .stream()
+            .collect(Collectors.toMap(
+                    x->x.get(0, Integer.class),
+                    x->x.get(1, Long.class).intValue()));
     }
 
     public List<OutGoodDto> findSortedDtoByPageable(Pageable pageable){

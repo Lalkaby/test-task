@@ -4,9 +4,9 @@ spring:
     open-in-view: false
   flyway:
     locations: classpath:db.migration
-#    enabled: true
-#    validate-on-migrate: true
-#    baseline-on-migrate: true
+    enabled: true
+    validate-on-migrate: true
+    baseline-on-migrate: true
   mvc:
     problem-details:
       enabled: true

@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Formula;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -50,11 +51,14 @@ public class Orders {
     @Enumerated(EnumType.STRING)
     private Status status = Status.valueOf("DRAFT");
 
+    @Formula(value = "(select coalesce(sum(go.amount),0) from good_order go where go.id_order=id)")
+    private Integer amount;
+
     @Builder.Default
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @OneToMany(mappedBy = "order",cascade = {CascadeType.REFRESH,CascadeType.PERSIST,CascadeType.REMOVE},
-            targetEntity = GoodOrder.class)
+            targetEntity = GoodOrder.class, fetch = FetchType.EAGER)
     @BatchSize(size = 25)
     private List<GoodOrder> goodAssoc = new ArrayList<>();
 }

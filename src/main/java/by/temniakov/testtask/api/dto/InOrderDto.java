@@ -55,11 +55,11 @@ public class InOrderDto {
     @NotNull(message = "must be not null",groups = CreationInfo.class)
     @JsonProperty(value = "id_address")
     private Integer addressId;
-
-    @Schema(description = "Array of started goods in order",
-            minContains = 1,
-            contains = OutGoodDto.class,
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    @JsonProperty(value = "order_goods")
-    private List<InGoodOrderDto> goodOrders;
+//
+//    @Schema(description = "Array of started goods in order",
+//            minContains = 1,
+//            contains = OutGoodDto.class,
+//            requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+//    @JsonProperty(value = "order_goods")
+//    private List<InGoodOrderDto> goodOrders;
 }

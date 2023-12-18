@@ -10,7 +10,6 @@ import org.springframework.data.domain.ExampleMatcher;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: 11.12.2023 ?? 
 class GoodServiceTest {
     GoodService goodService;
 
